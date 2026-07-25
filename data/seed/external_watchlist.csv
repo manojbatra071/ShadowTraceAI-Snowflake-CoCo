@@ -1,0 +1,6 @@
+watchlist_id,entity_name,matched_account_id,source_type,source_name,match_strength,risk_level,published_date,summary,source_url
+WATCH-C003-01,Horizon Works Construction Ltd,ACC-C-003,ADVERSE_MEDIA,Synthetic News Monitor,0.96,HIGH,2026-05-22,Construction subcontractor investigated over worker accommodation and payroll diversion concerns,https://example.test/adverse-media/horizon-works
+WATCH-C003-02,Horizon Works Construction Ltd,ACC-C-003,COMPANY_REGISTRY,Synthetic Companies Registry,1.00,MEDIUM,2026-04-18,Beneficial ownership record incomplete and director changed recently,https://example.test/registry/horizon-works
+WATCH-I106-01,Daniel Ward,ACC-I-106,SANCTIONS_ADJACENT,Synthetic Screening Service,0.82,HIGH,2026-06-10,Close associate appears in a labour exploitation inquiry,https://example.test/watchlist/daniel-ward
+WATCH-C010-01,Northstar Design Studio,ACC-C-010,COMPANY_REGISTRY,Synthetic Companies Registry,1.00,LOW,2026-03-01,Registry record current and complete,https://example.test/registry/northstar
+

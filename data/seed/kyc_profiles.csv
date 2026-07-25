@@ -1,0 +1,12 @@
+kyc_profile_id,account_id,legal_name,nationality_or_incorporation,occupation_or_business,expected_monthly_turnover,beneficial_owner_status,identity_status,phone_number,email,residential_or_registered_address,last_reviewed_at
+KYC-C003,ACC-C-003,Horizon Works Construction Ltd,GB,Construction subcontracting,28000,INCOMPLETE,VERIFIED,+442079460003,compliance@horizonworks.example,18 Foundry Lane London,2026-01-10T10:00:00Z
+KYC-I101,ACC-I-101,Milan Petrov,RO,Construction labourer,1520,NOT_APPLICABLE,VERIFIED,+447700900101,milan101@example.test,4 Dockside House London,2026-01-12T10:00:00Z
+KYC-I102,ACC-I-102,Vinh Tran,VN,Construction labourer,1520,NOT_APPLICABLE,VERIFIED,+447700900102,vinh102@example.test,4 Dockside House London,2026-01-12T10:10:00Z
+KYC-I103,ACC-I-103,Ana Popescu,RO,Construction labourer,1520,NOT_APPLICABLE,VERIFIED,+447700900103,ana103@example.test,7 Dockside House London,2026-01-12T10:20:00Z
+KYC-I104,ACC-I-104,Niran Chai,TH,Construction labourer,1520,NOT_APPLICABLE,VERIFIED,+447700900104,niran104@example.test,7 Dockside House London,2026-01-12T10:30:00Z
+KYC-I105,ACC-I-105,Ravi Das,IN,Construction labourer,1520,NOT_APPLICABLE,VERIFIED,+447700900105,ravi105@example.test,9 Dockside House London,2026-01-12T10:40:00Z
+KYC-I106,ACC-I-106,Daniel Ward,GB,Labour coordinator,2400,NOT_APPLICABLE,VERIFIED,+447700900999,controller@example.test,28 Foundry Lane London,2026-01-12T11:00:00Z
+KYC-I107,ACC-I-107,Michael Reed,GB,Cash services,2200,NOT_APPLICABLE,VERIFIED,+447700900999,funnel@example.test,28 Foundry Lane London,2026-01-12T11:10:00Z
+KYC-C010,ACC-C-010,Northstar Design Studio,GB,Design services,52000,COMPLETE,VERIFIED,+442079460010,finance@northstar.example,25 Regent Street London,2026-01-05T09:00:00Z
+KYC-I201,ACC-I-201,Emily Carter,GB,Designer,3600,NOT_APPLICABLE,VERIFIED,+447700900201,emily@example.test,44 Maple Road London,2026-01-05T09:15:00Z
+

@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Complete build, run, test, demo, and submission guide for ShadowTraceAI on Snowflake.">
+  <title>ShadowTraceAI — Complete Activity Guide</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #eef3f8;
+      --ink: #10243e;
+      --muted: #5f6f82;
+      --line: #d9e2ec;
+      --cyan: #0f766e;
+      --blue: #1d4ed8;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --green: #15803d;
+      --code: #101b2d;
+      --shadow: 0 16px 40px rgba(15, 36, 62, .08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 88% -8%, rgba(29, 78, 216, .08), transparent 34rem),
+        linear-gradient(180deg, #f8fafc 0, var(--bg) 38rem);
+      line-height: 1.65;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    .layout { display: grid; grid-template-columns: 286px minmax(0,1fr); min-height: 100vh; }
+    aside {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      padding: 28px 20px; background: rgba(255,255,255,.96);
+      border-right: 1px solid var(--line); box-shadow: 8px 0 30px rgba(15,36,62,.035);
+    }
+    .brand { margin-bottom: 28px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      border: 1px solid #99d5cf; border-radius: 12px; color: var(--cyan);
+      background: linear-gradient(135deg, #ecfdf5, #eff6ff);
+      font-size: 22px; box-shadow: 0 8px 20px rgba(15,118,110,.10);
+    }
+    .brand h2 { margin: 12px 0 2px; font-size: 1rem; letter-spacing: -.01em; }
+    .brand p { margin: 0; color: var(--muted); font-size: .76rem; }
+    nav a {
+      display: flex; gap: 10px; align-items: center; padding: 8px 10px;
+      color: #52657a; border-left: 2px solid transparent; font-size: .82rem;
+      border-radius: 0 8px 8px 0;
+    }
+    nav a:hover, nav a.active { color: #0b3b59; background: #edf6f7; border-color: var(--cyan); text-decoration: none; }
+    nav span { width: 22px; color: #8ba0b5; font-variant-numeric: tabular-nums; }
+    .sidebar-actions { margin-top: 26px; display: grid; gap: 8px; }
+    button {
+      cursor: pointer; border: 1px solid #b8c8d8; border-radius: 9px;
+      padding: 8px 11px; color: #173451; background: #fff; font-weight: 650;
+    }
+    button:hover { border-color: var(--cyan); background: #f0fdfa; }
+    main { width: min(1120px, 100%); padding: 58px 54px 100px; margin: 0 auto; }
+    .hero {
+      position: relative; overflow: hidden; padding: 48px;
+      border: 1px solid var(--line); border-radius: 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f7fb 62%, #edf6f7 100%);
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: ""; position: absolute; right: -80px; top: -100px; width: 320px; height: 320px;
+      border: 1px solid rgba(15,118,110,.14); border-radius: 50%;
+      box-shadow: 0 0 0 42px rgba(15,118,110,.025), 0 0 0 90px rgba(29,78,216,.018);
+    }
+    .eyebrow { color: var(--cyan); font-size: .74rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { max-width: 780px; margin: 10px 0 14px; font-size: clamp(2.3rem, 5vw, 4.5rem); line-height: 1.02; letter-spacing: -.055em; }
+    .hero > p { max-width: 760px; color: #52657a; font-size: 1.05rem; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .badge { padding: 5px 9px; border: 1px solid #b7d9d5; border-radius: 999px; color: #0b615b; background: #ecfdf9; font-size: .75rem; }
+    section { scroll-margin-top: 24px; padding-top: 58px; }
+    h2 { margin: 0 0 8px; font-size: 1.8rem; letter-spacing: -.035em; }
+    h3 { margin: 30px 0 10px; font-size: 1.14rem; letter-spacing: -.02em; }
+    .lead { margin-top: 0; color: var(--muted); max-width: 840px; }
+    .grid { display: grid; gap: 14px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .card {
+      padding: 20px; border: 1px solid var(--line); border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(15,36,62,.045);
+    }
+    .card h3, .card h4 { margin-top: 0; }
+    .metric { color: var(--cyan); font-size: 2rem; font-weight: 850; letter-spacing: -.05em; }
+    .muted, .card p:last-child { color: var(--muted); }
+    .callout { margin: 18px 0; padding: 16px 18px; border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; background: #eff6ff; }
+    .callout.warning { border-color: var(--amber); background: #fff7ed; }
+    .callout.success { border-color: var(--green); background: #f0fdf4; }
+    .callout.danger { border-color: var(--red); background: #fef2f2; }
+    .callout strong { display: block; margin-bottom: 3px; }
+    .step {
+      display: grid; grid-template-columns: 42px 1fr; gap: 14px; margin: 16px 0;
+      padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
+    }
+    .step-number {
+      width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px;
+      color: #fff; background: var(--cyan); font-weight: 900; box-shadow: 0 8px 18px rgba(15,118,110,.18);
+    }
+    .step h3 { margin: 3px 0 5px; }
+    .code-wrap { position: relative; margin: 12px 0; }
+    pre {
+      overflow-x: auto; margin: 0; padding: 18px 54px 18px 18px;
+      border: 1px solid #243550; border-radius: 12px; color: #e5edf7; background: var(--code);
+      font-size: .84rem; line-height: 1.55; white-space: pre;
+    }
+    .copy {
+      position: absolute; top: 9px; right: 9px; padding: 5px 8px; font-size: .7rem;
+      background: #243550; color: #e4edf6; border-color: #455a77;
+    }
+    .checklist { list-style: none; padding: 0; margin: 12px 0; }
+    .checklist li { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; color: #34495f; }
+    .checklist input { margin-top: 6px; accent-color: var(--cyan); }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; overflow: hidden; border-radius: 12px; font-size: .88rem; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #0b615b; background: #edf6f7; font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .flow {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0;
+      padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #f8fafc;
+    }
+    .node { padding: 10px 13px; border: 1px solid #bdd3df; border-radius: 10px; color: #173b54; background: #fff; font-size: .83rem; }
+    .arrow { color: var(--cyan); font-weight: 900; }
+    details { margin: 10px 0; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    summary { cursor: pointer; padding: 14px 16px; font-weight: 750; }
+    details > div { padding: 0 16px 16px; color: #52657a; }
+    .footer { margin-top: 74px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: .84rem; }
+    .doc-control {
+      display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 1px;
+      margin: 18px 0 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--line);
+    }
+    .doc-control div { padding: 10px 12px; background: #fff; }
+    .doc-control b { display: block; color: var(--muted); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; }
+    .doc-control span { font-size: .78rem; font-weight: 700; }
+    .status { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 750; }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .status.target::before { background: var(--amber); }
+    .tag { display: inline-block; padding: 2px 7px; border: 1px solid #bfd0df; border-radius: 999px; color: #38546e; background: #f8fafc; font-size: .69rem; white-space: nowrap; }
+    .source-list { margin: 18px 0; padding: 18px 20px 18px 38px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .source-list li { margin: 7px 0; }
+    .calculator {
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px;
+      padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
+    }
+    .calculator label { display: grid; gap: 6px; color: var(--muted); font-size: .76rem; font-weight: 700; }
+    .calculator input {
+      width: 100%; padding: 10px; border: 1px solid #b8c8d8; border-radius: 9px;
+      color: var(--ink); background: #fff; font: inherit;
+    }
+    .result-rail { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-top: 12px; }
+    .result { padding: 16px; border: 1px solid var(--line); border-top: 3px solid var(--cyan); background: #f8fafc; }
+    .result b { display:block; color:var(--cyan); font-size:1.55rem; letter-spacing:-.04em; }
+    .swimlane { display: grid; grid-template-columns: 150px 1fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .lane-name, .lane-body { padding: 13px; border-bottom: 1px solid var(--line); }
+    .lane-name { color: #0b615b; background: #edf6f7; font-weight: 800; }
+    .lane-body { background: #fff; }
+    .print-only { display: none; }
+    @media (max-width: 900px) {
+      .layout { display: block; } aside { position: relative; height: auto; } nav { display: none; }
+      main { padding: 32px 20px 70px; } .hero { padding: 30px 24px; }
+      .grid.two, .grid.three { grid-template-columns: 1fr; }
+      .doc-control, .calculator, .result-rail { grid-template-columns: 1fr 1fr; }
+      .swimlane { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .doc-control, .calculator, .result-rail { grid-template-columns: 1fr; }
+      h1 { font-size: 2.15rem; overflow-wrap: anywhere; }
+      .hero p, .eyebrow { overflow-wrap: anywhere; }
+    }
+    @media print {
+      :root { --ink:#17222b; --muted:#4d5a64; --line:#cdd7dd; }
+      body { background: #fff; color: var(--ink); font-size: 10pt; }
+      aside, .copy, .sidebar-actions { display: none !important; }
+      .layout { display: block; } main { width: 100%; padding: 0; }
+      .hero, .card, .step, details, .flow { background: #fff; box-shadow: none; break-inside: avoid; }
+      .hero { padding: 24px; } .hero::after { display:none; }
+      section { padding-top: 26px; } pre { white-space: pre-wrap; color:#15242d; background:#f4f7f9; }
+      a { color:#155a72; } .print-only { display:block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">◈</div>
+        <h2>ShadowTraceAI</h2>
+        <p>Integrated solution handbook · v2.0</p>
+      </div>
+      <nav aria-label="Guide sections">
+        <a href="#overview"><span>01</span> Executive overview</a>
+        <a href="#why"><span>02</span> Why this matters</a>
+        <a href="#proposition"><span>03</span> Business proposition</a>
+        <a href="#stakeholders"><span>04</span> Users & outcomes</a>
+        <a href="#scope"><span>05</span> Scope & assumptions</a>
+        <a href="#requirements"><span>06</span> Requirements</a>
+        <a href="#prerequisites"><span>07</span> Prerequisites</a>
+        <a href="#account"><span>08</span> Snowflake account</a>
+        <a href="#local"><span>09</span> Local environment</a>
+        <a href="#connection"><span>10</span> Connection</a>
+        <a href="#build"><span>11</span> Build objects</a>
+        <a href="#validate"><span>12</span> Validate</a>
+        <a href="#run"><span>13</span> Run locally</a>
+        <a href="#sdd"><span>14</span> SDD · Solution design</a>
+        <a href="#dsd"><span>15</span> DSD · Detailed design</a>
+        <a href="#sop"><span>16</span> SOP · Operations</a>
+        <a href="#controls"><span>17</span> Controls & governance</a>
+        <a href="#operating-model"><span>18</span> RACI & service model</a>
+        <a href="#business-case"><span>19</span> KPIs & business case</a>
+        <a href="#testing"><span>20</span> Test & acceptance</a>
+        <a href="#coco"><span>21</span> CoCo workflow</a>
+        <a href="#demo"><span>22</span> Demo activity</a>
+        <a href="#deploy"><span>23</span> Deploy & runbook</a>
+        <a href="#evidence"><span>24</span> Submission evidence</a>
+        <a href="#troubleshooting"><span>25</span> Troubleshooting</a>
+        <a href="#reset"><span>26</span> Reset and cleanup</a>
+        <a href="#checklist"><span>27</span> Final checklist</a>
+      </nav>
+      <div class="sidebar-actions">
+        <button type="button" onclick="window.print()">Print / Save PDF</button>
+        <button type="button" onclick="resetChecklist()">Reset checklist</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="hero" id="top">
+        <div class="eyebrow">Business case · SDD · DSD · SOP · Runbook</div>
+        <h1>The one-stop operating handbook for ShadowTraceAI.</h1>
+        <p>Why the problem matters, what the copilot delivers, how the Snowflake system works, and exactly how to build, operate, control, test, demonstrate, and evolve it—from synthetic prototype to production-ready design.</p>
+        <div class="badges">
+          <span class="badge">Domain-Specific AI Copilot</span>
+          <span class="badge">CASE-C003 · 92/100 CRITICAL</span>
+          <span class="badge">Windows PowerShell</span>
+          <span class="badge">Synthetic data only</span>
+        </div>
+      </header>
+      <div class="doc-control" aria-label="Document control">
+        <div><b>Document</b><span>Integrated Solution Handbook</span></div>
+        <div><b>Version</b><span>2.0</span></div>
+        <div><b>Status</b><span>Prototype + target design</span></div>
+        <div><b>Owner</b><span>ShadowTraceAI team</span></div>
+        <div><b>Audience</b><span>Business, risk, engineering</span></div>
+        <div><b>Classification</b><span>Synthetic demonstration</span></div>
+      </div>
+
+      <section id="overview">
+        <div class="eyebrow">01 · Orientation</div>
+        <h2>Executive overview</h2>
+        <p class="lead">ShadowTraceAI is a Snowflake-powered AML intelligence copilot focused on modern-slavery and human-trafficking indicators. It connects transactions, KYC, devices, external intelligence, and document metadata; detects network-aware typologies in SQL; and converts evidence into an explainable, human-controlled case decision.</p>
+        <div class="grid three">
+          <div class="card"><div class="metric">5</div><h3>Typologies</h3><p>Wage harvesting, account control, spending anomaly, geographic risk, and sector risk.</p></div>
+          <div class="card"><div class="metric">92</div><h3>Demo score</h3><p>CASE-C003 reaches CRITICAL through visible additive logic, not a case-ID override.</p></div>
+          <div class="card"><div class="metric">8</div><h3>App tabs</h3><p>From overview and network evidence through reviewer decision and audit trail.</p></div>
+        </div>
+        <div class="flow" aria-label="Architecture flow">
+          <span class="node">Seed CSVs</span><span class="arrow">→</span>
+          <span class="node">Snowflake tables</span><span class="arrow">→</span>
+          <span class="node">Typology views</span><span class="arrow">→</span>
+          <span class="node">Risk + brief</span><span class="arrow">→</span>
+          <span class="node">Streamlit</span><span class="arrow">→</span>
+          <span class="node">Human decision + audit</span>
+        </div>
+        <div class="callout warning"><strong>Important operating model</strong>The application can run in your local browser, but Snowflake remains the database. A fully offline database mode is intentionally not used.</div>
+        <h3>Document hierarchy</h3>
+        <table>
+          <thead><tr><th>Reader question</th><th>Handbook layer</th><th>Decision enabled</th></tr></thead>
+          <tbody>
+            <tr><td>Why should we invest?</td><td>Business proposition and measurable outcomes</td><td>Sponsor / funding decision</td></tr>
+            <tr><td>What will the solution do?</td><td>Scope, personas, requirements, controls</td><td>Product and risk approval</td></tr>
+            <tr><td>How is it designed?</td><td>SDD and DSD</td><td>Architecture and engineering approval</td></tr>
+            <tr><td>How is it operated?</td><td>SOP, RACI, deployment runbook</td><td>Service readiness</td></tr>
+            <tr><td>How do we prove it?</td><td>Tests, demo, KPIs, evidence register</td><td>Acceptance and submission</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="why">
+        <div class="eyebrow">02 · Why</div>
+        <h2>Modern-slavery risk is a network problem hidden inside fragmented evidence.</h2>
+        <p class="lead">Individual transactions can look ordinary. Suspicion becomes visible only when employer payroll, rapid onward transfers, shared control signals, weak KYC, risky sectors, recruitment corridors, documents, and external intelligence are evaluated together.</p>
+        <div class="grid three">
+          <div class="card"><div class="metric">50M</div><h3>People affected</h3><p>The ILO estimated that 50 million people were living in modern slavery in 2021, including 28 million in forced labour.</p></div>
+          <div class="card"><div class="metric">$236B</div><h3>Illegal annual profit</h3><p>The ILO estimated annual illegal profits from forced labour in the private economy at US$236 billion.</p></div>
+          <div class="card"><div class="metric">1 ≠ proof</div><h3>Signals need context</h3><p>FATF guidance stresses that one indicator alone is unlikely to confirm trafficking-related money laundering; combinations and context matter.</p></div>
+        </div>
+        <h3>Current-state failure pattern</h3>
+        <div class="swimlane">
+          <div class="lane-name">Data</div><div class="lane-body">Transactions, KYC, devices, documents, watchlists, and media are reviewed in separate tools or queues.</div>
+          <div class="lane-name">Detection</div><div class="lane-body">Generic AML rules may not encode wage harvesting, shared account control, low personal spending, worker networks, and labour-intensive sector context together.</div>
+          <div class="lane-name">Investigation</div><div class="lane-body">Analysts manually reconstruct relationships, repeat searches, and write narrative explanations with inconsistent evidence coverage.</div>
+          <div class="lane-name">Decision</div><div class="lane-body">Risk reasoning, reviewer rationale, evidence gaps, and final outcomes can be difficult to trace as one chronology.</div>
+          <div class="lane-name">Management</div><div class="lane-body">Without standard measures, leaders cannot reliably compare handling time, evidence completeness, false positives, or control adherence.</div>
+        </div>
+        <ol class="source-list">
+          <li><a href="https://www.ilo.org/resource/news/50-million-people-worldwide-modern-slavery-0">ILO — 50 million people worldwide in modern slavery</a></li>
+          <li><a href="https://www.ilo.org/resource/news/annual-profits-forced-labour-amount-us-236-billion-ilo-report-finds">ILO — Annual forced-labour profits estimated at US$236 billion</a></li>
+          <li><a href="https://www.fatf-gafi.org/en/publications/Methodsandtrends/Moneylaunderingrisksarisingfromtraffickingofhumanbeingsandsmugglingofmigrants.html">FATF — Money-laundering risks from trafficking and migrant smuggling</a></li>
+          <li><a href="https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Human-Trafficking-2018.pdf">FATF/APG — Financial flows from human trafficking</a></li>
+        </ol>
+      </section>
+
+      <section id="proposition">
+        <div class="eyebrow">03 · What</div>
+        <h2>One governed evidence plane turns scattered alerts into defensible decisions.</h2>
+        <p class="lead">The proposition is not “AI replaces the investigator.” It is “Snowflake assembles the evidence, SQL explains the risk, and a reviewer makes a better controlled decision.”</p>
+        <div class="grid three">
+          <div class="card"><h3>Connect</h3><p>Unify transaction, customer, device, intelligence, and document evidence around a case and connected-account graph.</p></div>
+          <div class="card"><h3>Explain</h3><p>Calculate a reproducible 0–100 score with visible typology contributions, evidence strength, top factors, and route.</p></div>
+          <div class="card"><h3>Act safely</h3><p>Present an investigation brief and recommended decision while preserving named human review and a complete audit trail.</p></div>
+        </div>
+        <h3>Value pillars</h3>
+        <table>
+          <thead><tr><th>Pillar</th><th>Operational change</th><th>How value is measured</th></tr></thead>
+          <tbody>
+            <tr><td>Analyst productivity</td><td>Less manual evidence collection and narrative assembly</td><td>Active handling minutes per case</td></tr>
+            <tr><td>Evidence consistency</td><td>Five typologies and required sources assessed systematically</td><td>Evidence-completeness rate</td></tr>
+            <tr><td>Network awareness</td><td>Employer, worker, controller, funnel, device, and funds-flow relationships shown together</td><td>Connected entities identified per true case</td></tr>
+            <tr><td>Decision defensibility</td><td>Score, factors, missing evidence, rationale, and chronology retained</td><td>Decisions with complete audit lineage</td></tr>
+            <tr><td>Safer AI adoption</td><td>Deterministic scoring works without generative AI; narratives are grounded and reviewable</td><td>Explainability coverage and human-gate adherence</td></tr>
+          </tbody>
+        </table>
+        <h3>Domain coverage: individual and corporate signals</h3>
+        <table>
+          <thead><tr><th>Typology</th><th>Individual-account manifestation</th><th>Corporate-account manifestation</th></tr></thead>
+          <tbody>
+            <tr><td>Wage harvesting</td><td>Employer credit followed by rapid bulk transfer to a third party</td><td>Payroll recipients exceed declared employee count or registry profile</td></tr>
+            <tr><td>Account control</td><td>Shared device, IP, contact, address, or handler across unrelated holders</td><td>Directors/owners differ from observed operators or controller contacts</td></tr>
+            <tr><td>Spending anomaly</td><td>Little food, rent, transport, or ordinary personal spend despite income</td><td>Cash or payment behaviour conflicts with stated business model</td></tr>
+            <tr><td>Geographic risk</td><td>Recruitment corridors and rapid foreign cash-out inconsistent with profile</td><td>Payments to exploitation-linked entities or locations without business rationale</td></tr>
+            <tr><td>Sector risk</td><td>Income tied to labour-intensive sectors with other control indicators</td><td>Construction, agriculture, hospitality, labour supply, or similar activity plus KYC mismatch</td></tr>
+          </tbody>
+        </table>
+        <div class="callout success"><strong>Outcome statement</strong>Reduce time-to-insight and variation in AML investigations while improving evidence quality, reviewer accountability, and audit reconstruction.</div>
+      </section>
+
+      <section id="stakeholders">
+        <div class="eyebrow">04 · Who</div>
+        <h2>Every stakeholder receives a different, traceable outcome.</h2>
+        <table>
+          <thead><tr><th>Persona</th><th>Primary need</th><th>ShadowTraceAI outcome</th><th>Decision right</th></tr></thead>
+          <tbody>
+            <tr><td>AML investigator</td><td>Understand the case quickly</td><td>Connected evidence, signals, network, score, brief, missing evidence</td><td>Recommend or record case disposition according to role</td></tr>
+            <tr><td>Senior reviewer / MLRO delegate</td><td>Make a defensible escalation decision</td><td>Full rationale, source evidence, confidence, audit chronology</td><td>Escalate, request evidence, monitor, or close</td></tr>
+            <tr><td>Financial-crime product owner</td><td>Operate a consistent service</td><td>Standard workflow, KPIs, exceptions, backlog, and control evidence</td><td>Prioritise roadmap and acceptance</td></tr>
+            <tr><td>Data / platform engineer</td><td>Deliver reliable governed data products</td><td>Typed model, ordered SQL build, views, tests, deployment runbook</td><td>Technical release and recovery</td></tr>
+            <tr><td>Model risk / compliance</td><td>Validate logic and human oversight</td><td>Visible weights, thresholds, prompt boundaries, test evidence</td><td>Approve scoring/prompt changes</td></tr>
+            <tr><td>Audit / assurance</td><td>Reconstruct who knew what and when</td><td>Linked decisions, actors, objects, timestamps, and metadata</td><td>Challenge control design and operation</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="scope">
+        <div class="eyebrow">05 · Boundary</div>
+        <h2>Prototype scope is focused; production design is explicit.</h2>
+        <div class="grid two">
+          <div class="card"><h3>In scope now <span class="status">Implemented</span></h3>
+            <ul>
+              <li>Six synthetic seed datasets and two cases</li>
+              <li>Ten requested operational tables plus brief persistence</li>
+              <li>Five typology views and a case-network view</li>
+              <li>Explainable score, evidence strength, route, and brief</li>
+              <li>Eight-tab Streamlit reviewer experience</li>
+              <li>Four reviewer decisions with transactional audit write</li>
+              <li>SQL acceptance tests and CoCo evidence workflow</li>
+            </ul>
+          </div>
+          <div class="card"><h3>Production target <span class="status target">Design</span></h3>
+            <ul>
+              <li>Controlled source ingestion, CDC, and data contracts</li>
+              <li>Enterprise identity, RBAC, masking, retention, and legal hold</li>
+              <li>Case assignment, queues, SLAs, comments, and attachments</li>
+              <li>Threshold calibration and outcome-based monitoring</li>
+              <li>Prompt/model governance and evaluation</li>
+              <li>Operational observability, incident response, and DR</li>
+              <li>Jurisdiction-specific SAR preparation interfaces</li>
+            </ul>
+          </div>
+        </div>
+        <h3>Explicitly out of scope</h3>
+        <ul>
+          <li>Autonomous SAR filing, customer restriction, account closure, or law-enforcement reporting.</li>
+          <li>Determining that trafficking or exploitation has occurred.</li>
+          <li>Use of real customer, victim, employee, or confidential bank data in the hackathon prototype.</li>
+          <li>Production claims about time or cost reduction before a measured pilot.</li>
+        </ul>
+        <div class="callout warning"><strong>Core assumptions</strong>All identities and evidence are synthetic; rules illustrate a defensible framework rather than universal legal thresholds; business benefits are hypotheses to measure through a controlled pilot.</div>
+      </section>
+
+      <section id="requirements">
+        <div class="eyebrow">06 · Requirements baseline</div>
+        <h2>Business, functional, control, and service requirements are traceable.</h2>
+        <table>
+          <thead><tr><th>ID</th><th>Requirement</th><th>Acceptance evidence</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>BR-01</td><td>Provide one case view across structured and document evidence</td><td>Evidence and brief tabs return linked case data</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>BR-02</td><td>Explain modern-slavery typology risk at case and network level</td><td>Five signal views and network graph</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>FR-01</td><td>Load accounts, transactions, KYC, device/IP, external, and document records</td><td>Seed COPY commands and row validation</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>FR-02</td><td>Calculate 0–100 score, band, evidence strength, factors, and route</td><td><code>vw_case_risk_summary</code></td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>FR-03</td><td>Generate a grounded investigation brief with missing evidence</td><td><code>vw_case_intelligence_brief</code></td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>FR-04</td><td>Allow four controlled reviewer decisions with rationale</td><td>Reviewer form and decision history</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>CR-01</td><td>Never file a SAR autonomously</td><td>Human acknowledgement and procedure boundary</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>CR-02</td><td>Write reviewer decision and audit event atomically</td><td>Stored-procedure transaction and linked IDs</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>NFR-01</td><td>Preserve reproducibility without generative AI</td><td>Deterministic SQL score and brief</td><td><span class="tag">Implemented</span></td></tr>
+            <tr><td>NFR-02</td><td>Enforce least privilege, masking, retention, and environment segregation</td><td>Production security design and control tests</td><td><span class="tag">Target</span></td></tr>
+            <tr><td>NFR-03</td><td>Expose pipeline freshness, failures, data quality, and usage telemetry</td><td>Operational dashboards and alerting</td><td><span class="tag">Target</span></td></tr>
+          </tbody>
+        </table>
+        <h3>Requirement-to-proof traceability</h3>
+        <table>
+          <thead><tr><th>User need</th><th>Snowflake proof object</th><th>Application proof</th><th>Test / control</th></tr></thead>
+          <tbody>
+            <tr><td>See wage diversion</td><td><code>vw_wage_harvesting_signals</code></td><td>Typology Signals</td><td>Five-typology assertion</td></tr>
+            <tr><td>See coordinated control</td><td><code>device_ip_signals</code>, <code>vw_case_network</code></td><td>Account Network</td><td>Seven shared-access accounts</td></tr>
+            <tr><td>Understand 92</td><td><code>vw_case_risk_summary</code></td><td>Risk Score</td><td>Exact score/band/evidence assertions</td></tr>
+            <tr><td>Make a decision</td><td><code>sp_record_case_decision</code></td><td>Reviewer Decision</td><td>Allowed-value and atomic-write controls</td></tr>
+            <tr><td>Reconstruct history</td><td><code>audit_events</code></td><td>Audit Trail</td><td>Decision ID linkage query</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="prerequisites">
+        <div class="eyebrow">07 · Before you begin</div>
+        <h2>Prerequisites</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Local workstation</h3>
+            <ul class="checklist">
+              <li><input type="checkbox" data-check="python"><span>Python 3.10 or newer</span></li>
+              <li><input type="checkbox" data-check="powershell"><span>PowerShell and Git</span></li>
+              <li><input type="checkbox" data-check="repo"><span>Project cloned to the local machine</span></li>
+              <li><input type="checkbox" data-check="network"><span>Network access to your Snowflake account</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Snowflake</h3>
+            <ul class="checklist">
+              <li><input type="checkbox" data-check="account"><span>Active Snowflake account</span></li>
+              <li><input type="checkbox" data-check="role"><span>Role that can create database, schema, stage, tables, views, procedure, and Streamlit</span></li>
+              <li><input type="checkbox" data-check="warehouse"><span>Running warehouse such as <code>COMPUTE_WH</code></span></li>
+              <li><input type="checkbox" data-check="cortex"><span>Optional Cortex role/model access</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>python --version
+git --version
+Get-ExecutionPolicy</code></pre></div>
+      </section>
+
+      <section id="account">
+        <div class="eyebrow">08 · Cloud preparation</div>
+        <h2>Prepare the Snowflake account</h2>
+        <p class="lead">Use an existing warehouse or create one in Snowsight. For a hackathon sandbox, start with a small warehouse and suspend it when not in use.</p>
+        <div class="step">
+          <div class="step-number">1</div>
+          <div><h3>Confirm context in Snowsight</h3>
+            <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>SELECT CURRENT_ACCOUNT(), CURRENT_USER(), CURRENT_ROLE(), CURRENT_WAREHOUSE();
+SHOW WAREHOUSES;</code></pre></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div><h3>Optionally create a dedicated warehouse</h3>
+            <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>CREATE WAREHOUSE IF NOT EXISTS SHADOWTRACE_WH
+  WAREHOUSE_SIZE = 'XSMALL'
+  AUTO_SUSPEND = 60
+  AUTO_RESUME = TRUE
+  INITIALLY_SUSPENDED = TRUE;</code></pre></div>
+            <p class="muted">If you use this warehouse, change <code>COMPUTE_WH</code> to <code>SHADOWTRACE_WH</code> in the connection and deployment configuration.</p>
+          </div>
+        </div>
+        <div class="callout danger"><strong>Cost control</strong>Use auto-suspend and avoid leaving a warehouse running after the demo. Cortex calls may incur separate consumption.</div>
+      </section>
+
+      <section id="local">
+        <div class="eyebrow">09 · Workstation setup</div>
+        <h2>Create the local environment</h2>
+        <div class="step"><div class="step-number">1</div><div>
+          <h3>Open the repository</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>cd C:\Users\manoj\Development\Github\ShadowTraceAI-Snowflake-CoCo</code></pre></div>
+        </div></div>
+        <div class="step"><div class="step-number">2</div><div>
+          <h3>Create and activate a virtual environment</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt</code></pre></div>
+          <p class="muted">If script execution is blocked, use <code>Set-ExecutionPolicy -Scope Process Bypass</code> for the current PowerShell process.</p>
+        </div></div>
+        <div class="step"><div class="step-number">3</div><div>
+          <h3>Install Snowflake CLI</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>pipx install snowflake-cli
+snow --version</code></pre></div>
+          <p class="muted">If <code>pipx</code> is unavailable, install the CLI in the virtual environment with <code>pip install snowflake-cli</code>.</p>
+        </div></div>
+      </section>
+
+      <section id="connection">
+        <div class="eyebrow">10 · Authentication</div>
+        <h2>Configure and test the connection</h2>
+        <div class="step"><div class="step-number">1</div><div>
+          <h3>Add the Snowflake CLI connection</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>snow connection add
+snow connection test -c shadowtrace</code></pre></div>
+          <p>Use <code>shadowtrace</code> as the connection name, or replace it consistently in every command below.</p>
+        </div></div>
+        <div class="step"><div class="step-number">2</div><div>
+          <h3>Create local Streamlit secrets</h3>
+          <p>Create <code>.streamlit/secrets.toml</code>:</p>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>[connections.snowflake]
+account = "YOUR_ACCOUNT_IDENTIFIER"
+user = "YOUR_USERNAME"
+password = "YOUR_PASSWORD_OR_TOKEN"
+role = "ACCOUNTADMIN"
+warehouse = "COMPUTE_WH"
+database = "SHADOWTRACE_AI"
+schema = "AML"</code></pre></div>
+        </div></div>
+        <div class="callout warning"><strong>Never commit credentials</strong><code>.streamlit/secrets.toml</code> is ignored by the repository. Prefer browser SSO or a scoped programmatic access token where your organization supports it.</div>
+        <h3>Connection smoke test</h3>
+        <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>snow sql -c shadowtrace -q "SELECT CURRENT_USER(), CURRENT_ROLE(), CURRENT_WAREHOUSE(), CURRENT_VERSION()"</code></pre></div>
+      </section>
+
+      <section id="build">
+        <div class="eyebrow">11 · Snowflake build</div>
+        <h2>Create and populate the application objects</h2>
+        <p class="lead">Run the files in order. The seed loader uses relative <code>file://data/seed/...</code> paths, so remain in the repository root.</p>
+        <table>
+          <thead><tr><th>Order</th><th>File</th><th>Activity</th><th>Expected result</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code>01_schema.sql</code></td><td>Database, schema, tables, file format, stage</td><td>Core objects created</td></tr>
+            <tr><td>2</td><td><code>02_load_seed_data.sql</code></td><td>Upload CSV files and load synthetic cases</td><td>CASE-C003 and CASE-C010 available</td></tr>
+            <tr><td>3</td><td><code>03_typology_views.sql</code></td><td>Five typologies and network view</td><td>Five C003 signals detected</td></tr>
+            <tr><td>4</td><td><code>04_risk_scoring.sql</code></td><td>Risk summary and persisted score</td><td>92 / CRITICAL / STRONG</td></tr>
+            <tr><td>5</td><td><code>05_case_brief.sql</code></td><td>Prompt, deterministic brief, timeline</td><td>Investigation brief available</td></tr>
+            <tr><td>6</td><td><code>06_decisions_audit.sql</code></td><td>Transactional reviewer procedure</td><td>Procedure created</td></tr>
+          </tbody>
+        </table>
+        <div class="code-wrap"><button class="copy" type="button">Copy all</button><pre><code>snow sql -c shadowtrace -f sql/01_schema.sql
+snow sql -c shadowtrace -f sql/02_load_seed_data.sql
+snow sql -c shadowtrace -f sql/03_typology_views.sql
+snow sql -c shadowtrace -f sql/04_risk_scoring.sql
+snow sql -c shadowtrace -f sql/05_case_brief.sql
+snow sql -c shadowtrace -f sql/06_decisions_audit.sql</code></pre></div>
+        <div class="callout"><strong>Optional Cortex activity</strong>After the deterministic application works, execute <code>sql/05b_cortex_brief_optional.sql</code>. Skip it if your region, role, or account lacks model access.</div>
+      </section>
+
+      <section id="validate">
+        <div class="eyebrow">12 · Quality gate</div>
+        <h2>Validate the data and risk logic</h2>
+        <div class="step"><div class="step-number">1</div><div>
+          <h3>Run the automated SQL tests</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>snow sql -c shadowtrace -f tests/test_risk_logic.sql</code></pre></div>
+          <p>Six rows should return <strong>PASS</strong>. The script raises an exception if any assertion fails.</p>
+        </div></div>
+        <div class="step"><div class="step-number">2</div><div>
+          <h3>Inspect the five detected typologies</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>SELECT signal_type, risk_points, explanation
+FROM SHADOWTRACE_AI.AML.vw_all_typology_signals
+WHERE case_id = 'CASE-C003' AND signal_detected
+ORDER BY risk_points DESC;</code></pre></div>
+        </div></div>
+        <div class="step"><div class="step-number">3</div><div>
+          <h3>Reconcile the score</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>SELECT case_id, risk_score, risk_band, evidence_strength,
+       recommended_route, score_breakdown, top_risk_factors
+FROM SHADOWTRACE_AI.AML.vw_case_risk_summary
+ORDER BY risk_score DESC;</code></pre></div>
+        </div></div>
+        <table>
+          <thead><tr><th>Factor</th><th>Points</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr><td>Wage harvesting</td><td>25</td><td>Five workers rapidly transfer most wages</td></tr>
+            <tr><td>Account control</td><td>25</td><td>Seven accounts share device and IP</td></tr>
+            <tr><td>Spending anomaly</td><td>14</td><td>Minimal everyday spend and rapid depletion</td></tr>
+            <tr><td>Geographic risk</td><td>12</td><td>Cross-border recruitment and foreign cash-out</td></tr>
+            <tr><td>Sector risk</td><td>8</td><td>Construction and incomplete ownership</td></tr>
+            <tr><td>External intelligence</td><td>4</td><td>Adverse-media/watchlist matches</td></tr>
+            <tr><td>Document evidence</td><td>4</td><td>Payroll, contract, identity, accommodation indicators</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>92</strong></td><td><strong>CRITICAL · STRONG</strong></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="run">
+        <div class="eyebrow">13 · Local experience</div>
+        <h2>Run Streamlit locally</h2>
+        <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>.\.venv\Scripts\Activate.ps1
+streamlit run app/streamlit_app.py</code></pre></div>
+        <p>Open <a href="http://localhost:8501">http://localhost:8501</a>. Select <strong>CASE-C003</strong>.</p>
+        <div class="grid two">
+          <div class="card"><h3>Expected visual state</h3>
+            <ul>
+              <li>Risk score: <strong>92/100</strong></li>
+              <li>Band: <strong>CRITICAL</strong></li>
+              <li>Evidence: <strong>STRONG</strong></li>
+              <li>Route: <strong>Escalate to SAR</strong></li>
+              <li>Five typology signals</li>
+            </ul>
+          </div>
+          <div class="card"><h3>Eight tabs</h3>
+            <p>Overview · Typology Signals · Account Network · Evidence · Risk Score · Case Intelligence Brief · Reviewer Decision · Audit Trail</p>
+          </div>
+        </div>
+        <div class="callout success"><strong>Local success condition</strong>The browser renders CASE-C003 and switching between all eight tabs produces Snowflake-backed results without a connection error.</div>
+      </section>
+
+      <section id="sdd">
+        <div class="eyebrow">14 · SDD</div>
+        <h2>Solution Design Document: Snowflake is the governed evidence and decision plane.</h2>
+        <p class="lead">The design keeps data, detection, scoring, case intelligence, reviewer decisions, and audit lineage close together. The Streamlit layer presents and writes through governed Snowflake objects rather than implementing parallel business logic.</p>
+        <h3>Logical architecture</h3>
+        <div class="flow">
+          <span class="node">Transactions</span><span class="node">Accounts + KYC</span><span class="node">Device/IP</span><span class="node">Watchlists</span><span class="node">Documents</span>
+          <span class="arrow">→</span><span class="node">Internal stage + typed tables</span>
+          <span class="arrow">→</span><span class="node">Five typology views</span>
+          <span class="arrow">→</span><span class="node">Case network</span>
+          <span class="arrow">→</span><span class="node">Risk summary</span>
+          <span class="arrow">→</span><span class="node">Brief + grounded prompt</span>
+          <span class="arrow">→</span><span class="node">Streamlit review</span>
+          <span class="arrow">→</span><span class="node">Decision + audit</span>
+        </div>
+        <h3>Component responsibilities</h3>
+        <table>
+          <thead><tr><th>Layer</th><th>Responsibility</th><th>Key objects</th><th>Failure boundary</th></tr></thead>
+          <tbody>
+            <tr><td>Ingestion</td><td>Stage and type source records</td><td><code>SEED_STAGE</code>, <code>CSV_SEED_FORMAT</code>, core tables</td><td>Reject malformed or contract-breaking data</td></tr>
+            <tr><td>Detection</td><td>Detect evidence-backed typologies</td><td>Five signal views</td><td>No case disposition; signals only</td></tr>
+            <tr><td>Network</td><td>Expose account and funds-flow relationships</td><td><code>vw_case_network</code></td><td>No inferred guilt or victim determination</td></tr>
+            <tr><td>Decision intelligence</td><td>Score, rank factors, recommend route</td><td><code>vw_case_risk_summary</code></td><td>Recommendation is non-binding</td></tr>
+            <tr><td>Narrative</td><td>Assemble deterministic brief and optional AI prompt</td><td><code>vw_case_intelligence_brief</code>, optional <code>AI_COMPLETE</code></td><td>Only supplied evidence; reviewer validates</td></tr>
+            <tr><td>Experience</td><td>Present evidence and capture human decision</td><td><code>streamlit_app.py</code></td><td>No regulatory filing endpoint</td></tr>
+            <tr><td>Control</td><td>Persist decision and audit chronology</td><td><code>sp_record_case_decision</code>, decisions, audit</td><td>Rollback on any write failure</td></tr>
+          </tbody>
+        </table>
+        <h3>Environment topology</h3>
+        <table>
+          <thead><tr><th>Environment</th><th>Data</th><th>Purpose</th><th>Promotion gate</th></tr></thead>
+          <tbody>
+            <tr><td>LOCAL</td><td>Synthetic only</td><td>Streamlit development against Snowflake DEV</td><td>Compile and developer smoke test</td></tr>
+            <tr><td>DEV</td><td>Synthetic / masked</td><td>SQL integration and feature development</td><td>Automated tests</td></tr>
+            <tr><td>TEST / UAT</td><td>Representative masked cases</td><td>Calibration, control validation, investigator acceptance</td><td>Risk, product, security approval</td></tr>
+            <tr><td>PROD</td><td>Controlled customer data</td><td>Operational investigation service</td><td>Change record, rollback, monitoring, duty approval</td></tr>
+          </tbody>
+        </table>
+        <h3>Production non-functional design</h3>
+        <div class="grid two">
+          <div class="card"><h3>Security and privacy</h3><p>Federated identity, least privilege, row/column policies, masking, secure views, encryption, secrets management, purpose limitation, retention, and access review.</p></div>
+          <div class="card"><h3>Reliability</h3><p>Idempotent ingestion, retry boundaries, freshness checks, release rollback, backup/retention controls, and documented recovery objectives.</p></div>
+          <div class="card"><h3>Performance</h3><p>Case selection and core views should meet an agreed interactive-response SLO at expected concurrency and evidence volume.</p></div>
+          <div class="card"><h3>Observability</h3><p>Pipeline failures, data quality, query latency, app errors, score distribution drift, decision mix, and human-gate exceptions become monitored service signals.</p></div>
+        </div>
+      </section>
+
+      <section id="dsd">
+        <div class="eyebrow">15 · DSD</div>
+        <h2>Detailed System Design: objects, grain, dependencies, and algorithms are explicit.</h2>
+        <h3>Core data model</h3>
+        <table>
+          <thead><tr><th>Object</th><th>Grain / key</th><th>Purpose</th><th>Suggested production classification</th></tr></thead>
+          <tbody>
+            <tr><td><code>accounts</code></td><td>One row per account · <code>account_id</code></td><td>Customer/account and sector context</td><td>Restricted customer data</td></tr>
+            <tr><td><code>transactions</code></td><td>One row per transaction · <code>transaction_id</code></td><td>Funds-flow evidence</td><td>Restricted financial data</td></tr>
+            <tr><td><code>kyc_profiles</code></td><td>One profile snapshot · <code>kyc_profile_id</code></td><td>Identity, expected activity, ownership</td><td>Restricted personal/KYC data</td></tr>
+            <tr><td><code>device_ip_signals</code></td><td>One observation · <code>signal_id</code></td><td>Shared-control and access indicators</td><td>Restricted telemetry</td></tr>
+            <tr><td><code>external_watchlist</code></td><td>One source match · <code>watchlist_id</code></td><td>Sanctions-adjacent, registry, adverse-media context</td><td>Confidential intelligence</td></tr>
+            <tr><td><code>document_evidence</code></td><td>One document · <code>document_id</code></td><td>Metadata, extraction confidence, indicators</td><td>Restricted evidence</td></tr>
+            <tr><td><code>case_alerts</code></td><td>One active alert/case · <code>case_id</code></td><td>Case header and assignment</td><td>Regulatory confidential</td></tr>
+            <tr><td><code>case_risk_scores</code></td><td>One score version · <code>risk_score_id</code></td><td>Persisted explanation and route</td><td>Regulatory confidential</td></tr>
+            <tr><td><code>case_decisions</code></td><td>One reviewer decision · <code>decision_id</code></td><td>Named disposition and rationale</td><td>Regulatory confidential</td></tr>
+            <tr><td><code>audit_events</code></td><td>One event · <code>audit_event_id</code></td><td>Actor/object/time/event lineage</td><td>Controlled audit record</td></tr>
+          </tbody>
+        </table>
+        <h3>Build dependency order</h3>
+        <div class="flow">
+          <span class="node">01 schema</span><span class="arrow">→</span>
+          <span class="node">02 seed load</span><span class="arrow">→</span>
+          <span class="node">03 signals + network</span><span class="arrow">→</span>
+          <span class="node">04 scoring</span><span class="arrow">→</span>
+          <span class="node">05 brief</span><span class="arrow">→</span>
+          <span class="node">06 decision procedure</span><span class="arrow">→</span>
+          <span class="node">07 Streamlit deployment</span>
+        </div>
+        <h3>Explainable scoring algorithm</h3>
+        <table>
+          <thead><tr><th>Signal</th><th>Detection condition in prototype</th><th>Points</th><th>Calibration owner</th></tr></thead>
+          <tbody>
+            <tr><td>Wage harvesting</td><td>At least three workers transfer ≥70% onward within 24 hours</td><td>25</td><td>Financial-crime typology owner</td></tr>
+            <tr><td>Account control</td><td>Common device/IP accesses at least four linked accounts</td><td>25</td><td>Fraud/device intelligence + AML</td></tr>
+            <tr><td>Spending anomaly</td><td>At least three workers show ≥80% transfer/cash depletion</td><td>14</td><td>Transaction monitoring</td></tr>
+            <tr><td>Geographic risk</td><td>Three or more worker countries plus foreign cash-out</td><td>12</td><td>Country-risk governance</td></tr>
+            <tr><td>Sector risk</td><td>Labour-intensive sector plus incomplete beneficial ownership</td><td>8</td><td>KYC/EDD policy owner</td></tr>
+            <tr><td>External intelligence</td><td>At least one high-risk linked-account intelligence hit</td><td>4</td><td>Screening governance</td></tr>
+            <tr><td>Document evidence</td><td>At least three risky documents</td><td>4</td><td>Document-control owner</td></tr>
+          </tbody>
+        </table>
+        <div class="callout warning"><strong>Calibration rule</strong>Weights and thresholds are prototype parameters. Production changes require documented rationale, labelled data, outcome analysis, versioning, regression testing, model-risk review, and approval.</div>
+        <h3>Decision transaction design</h3>
+        <ol>
+          <li>Validate the decision against the four allowed values.</li>
+          <li>Begin a database transaction.</li>
+          <li>Insert the named decision and rationale.</li>
+          <li>Insert an audit event referencing the generated decision ID.</li>
+          <li>Update the case status and assignee.</li>
+          <li>Commit all writes, or rollback all writes on error.</li>
+        </ol>
+        <h3>Application query contract</h3>
+        <p>All case-specific queries use bound parameters. The app attempts the active Snowflake session when hosted and falls back to <code>st.connection("snowflake").session()</code> locally. Cached reads have a short TTL; reviewer writes bypass read caching and clear cached data after success.</p>
+        <h3>Architecture decision record</h3>
+        <table>
+          <thead><tr><th>ADR</th><th>Decision</th><th>Reason</th><th>Consequence</th></tr></thead>
+          <tbody>
+            <tr><td>ADR-01</td><td>Snowflake is the system of analytical record</td><td>Keep evidence, logic, app reads, and audit lineage governed together</td><td>Local UI still depends on Snowflake connectivity</td></tr>
+            <tr><td>ADR-02</td><td>Risk score is deterministic SQL</td><td>Reproducibility and control take priority over opaque scoring</td><td>Threshold changes require governed SQL releases</td></tr>
+            <tr><td>ADR-03</td><td>Generative brief is optional</td><td>Core service must function without model access</td><td>Deterministic narrative may be less fluent but remains auditable</td></tr>
+            <tr><td>ADR-04</td><td>Reviewer decision and audit event are atomic</td><td>Prevent incomplete regulatory chronology</td><td>Any write failure rolls back the full decision</td></tr>
+            <tr><td>ADR-05</td><td>Prototype uses synthetic evidence only</td><td>Enable safe, reproducible demonstration</td><td>Production security and data controls remain separate acceptance gates</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="sop">
+        <div class="eyebrow">16 · SOP</div>
+        <h2>Standard Operating Procedure: investigate consistently, escalate safely.</h2>
+        <h3>SOP-01 · Start-of-day service check</h3>
+        <ol>
+          <li>Confirm the warehouse, app, source freshness, and latest successful load.</li>
+          <li>Confirm no failed data-quality or SQL test gates.</li>
+          <li>Review open cases, priorities, ownership, and SLA exceptions.</li>
+          <li>Escalate access, freshness, or integrity failures before case review.</li>
+        </ol>
+        <h3>SOP-02 · Investigator case review</h3>
+        <table>
+          <thead><tr><th>Step</th><th>Investigator action</th><th>Evidence/control</th><th>Exit condition</th></tr></thead>
+          <tbody>
+            <tr><td>1. Orient</td><td>Select the case and confirm customer/account context</td><td>Overview and case header</td><td>Correct case and ownership confirmed</td></tr>
+            <tr><td>2. Validate signals</td><td>Review each detected typology and underlying values</td><td>Typology Signals</td><td>No obvious data-quality explanation remains</td></tr>
+            <tr><td>3. Trace network</td><td>Follow employer, workers, controller, funnel, shared access, and cash-out</td><td>Account Network</td><td>Material relationships understood</td></tr>
+            <tr><td>4. Corroborate</td><td>Review transactions, documents, KYC, and external intelligence</td><td>Evidence tabs and source links</td><td>Evidence confidence and gaps recorded</td></tr>
+            <tr><td>5. Challenge score</td><td>Reconcile every point and route; note contrary evidence</td><td>Risk Score</td><td>Score accepted or challenged</td></tr>
+            <tr><td>6. Review brief</td><td>Validate summary, hypothesis, missing evidence, and recommended action</td><td>Case Intelligence Brief</td><td>Narrative grounded in evidence</td></tr>
+            <tr><td>7. Decide</td><td>Select allowed disposition, enter rationale, acknowledge human control</td><td>Reviewer Decision</td><td>Decision saved successfully</td></tr>
+            <tr><td>8. Verify</td><td>Confirm decision and linked audit event</td><td>Audit Trail</td><td>Chronology complete</td></tr>
+          </tbody>
+        </table>
+        <h3>SOP-03 · Decision standards</h3>
+        <table>
+          <thead><tr><th>Decision</th><th>Use when</th><th>Minimum rationale</th><th>Next action</th></tr></thead>
+          <tbody>
+            <tr><td>Escalate to SAR</td><td>Multi-source suspicion meets internal escalation policy</td><td>Key facts, typologies, network, gaps, and why escalation is proportionate</td><td>Transfer to authorised SAR assessment process</td></tr>
+            <tr><td>Request more evidence</td><td>A material gap prevents a defensible disposition</td><td>Specific missing item, owner, due date, and decision impact</td><td>Return to evidence collection</td></tr>
+            <tr><td>Monitor case</td><td>Concern exists but immediate escalation threshold is not met</td><td>Monitoring indicators, period, trigger, and owner</td><td>Schedule enhanced review</td></tr>
+            <tr><td>Close as false positive</td><td>A documented benign explanation resolves the indicators</td><td>Evidence-based explanation and residual-risk assessment</td><td>Close with audit record</td></tr>
+          </tbody>
+        </table>
+        <h3>SOP-04 · Safeguarding and outreach</h3>
+        <div class="callout danger"><strong>Potentially vulnerable customers</strong>Do not contact a potentially controlled individual through a suspected controller’s shared phone, email, device, or address. Follow the institution’s safeguarding, confidentiality, SAR non-disclosure, and law-enforcement liaison procedures.</div>
+        <h3>SOP-05 · Exception and incident handling</h3>
+        <ol>
+          <li>Stop decision activity if evidence is stale, incomplete, mismatched, or exposed to an unauthorised person.</li>
+          <li>Record incident time, affected case/object, user, symptom, and immediate containment.</li>
+          <li>Route data defects to the data owner, app failures to engineering, and control/privacy issues to the relevant duty owner.</li>
+          <li>Resume only after documented validation; never reconstruct missing audit history manually without approval.</li>
+        </ol>
+      </section>
+
+      <section id="controls">
+        <div class="eyebrow">17 · Control framework</div>
+        <h2>Controls make the copilot defensible, not merely impressive.</h2>
+        <table>
+          <thead><tr><th>Control ID</th><th>Risk</th><th>Preventive / detective control</th><th>Evidence</th><th>Frequency</th></tr></thead>
+          <tbody>
+            <tr><td>CTL-01</td><td>Autonomous regulatory action</td><td>Human acknowledgement; no filing interface</td><td>Decision record and app design</td><td>Every case</td></tr>
+            <tr><td>CTL-02</td><td>Unexplained score</td><td>Visible points, factors, version, and deterministic SQL</td><td>Risk view and test output</td><td>Every calculation</td></tr>
+            <tr><td>CTL-03</td><td>Partial decision write</td><td>Decision, audit, and case update in one transaction</td><td>Stored procedure and linked IDs</td><td>Every decision</td></tr>
+            <tr><td>CTL-04</td><td>Unsupported narrative</td><td>Bounded evidence prompt and deterministic fallback</td><td>Prompt text, source query, reviewer validation</td><td>Every brief</td></tr>
+            <tr><td>CTL-05</td><td>Unauthorised data access</td><td>Target RBAC, masking, secure views, access review</td><td>Grant reports and access logs</td><td>Continuous / periodic</td></tr>
+            <tr><td>CTL-06</td><td>Bad or stale data</td><td>Contracts, freshness, referential, volume, and null tests</td><td>Data-quality results</td><td>Every load</td></tr>
+            <tr><td>CTL-07</td><td>Threshold/model drift</td><td>Versioned scoring, distribution/outcome monitoring, approval</td><td>Calibration pack and change record</td><td>Monthly / change</td></tr>
+            <tr><td>CTL-08</td><td>Sensitive-data leakage</td><td>Synthetic prototype; production minimisation, masking, retention</td><td>Classification and retention evidence</td><td>Design + continuous</td></tr>
+          </tbody>
+        </table>
+        <h3>Target role model</h3>
+        <table>
+          <thead><tr><th>Role</th><th>Read</th><th>Write</th><th>Restricted action</th></tr></thead>
+          <tbody>
+            <tr><td>SHADOWTRACE_VIEWER</td><td>Approved case views</td><td>None</td><td>No raw restricted fields</td></tr>
+            <tr><td>SHADOWTRACE_INVESTIGATOR</td><td>Assigned case evidence</td><td>Working notes / evidence requests in target design</td><td>Cannot approve escalation</td></tr>
+            <tr><td>SHADOWTRACE_REVIEWER</td><td>Full authorised case</td><td>Allowed case decisions</td><td>Cannot alter score SQL or audit history</td></tr>
+            <tr><td>SHADOWTRACE_ENGINEER</td><td>Technical metadata / masked data</td><td>Approved non-production objects</td><td>No business decision</td></tr>
+            <tr><td>SHADOWTRACE_ADMIN</td><td>Platform administration</td><td>Controlled deployment/configuration</td><td>No silent production rule change</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="operating-model">
+        <div class="eyebrow">18 · Operating model</div>
+        <h2>Ownership spans business, risk, data, engineering, and assurance.</h2>
+        <table>
+          <thead><tr><th>Activity</th><th>Product owner</th><th>AML typology owner</th><th>Engineering</th><th>Reviewer / MLRO delegate</th><th>Model risk / audit</th></tr></thead>
+          <tbody>
+            <tr><td>Prioritise roadmap</td><td>A/R</td><td>C</td><td>C</td><td>C</td><td>I</td></tr>
+            <tr><td>Define typologies/thresholds</td><td>C</td><td>A/R</td><td>C</td><td>C</td><td>C</td></tr>
+            <tr><td>Build and deploy</td><td>A</td><td>C</td><td>R</td><td>I</td><td>C</td></tr>
+            <tr><td>Review cases</td><td>I</td><td>C</td><td>I</td><td>A/R</td><td>I</td></tr>
+            <tr><td>Monitor outcomes/drift</td><td>A</td><td>R</td><td>R</td><td>C</td><td>C</td></tr>
+            <tr><td>Approve material model change</td><td>C</td><td>R</td><td>C</td><td>C</td><td>A</td></tr>
+            <tr><td>Assure controls</td><td>C</td><td>C</td><td>C</td><td>C</td><td>A/R</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">R = Responsible · A = Accountable · C = Consulted · I = Informed. Named organisational owners must replace generic roles before production approval.</p>
+        <h3>Service cadence</h3>
+        <div class="grid three">
+          <div class="card"><h3>Daily</h3><p>Freshness, failures, backlog, SLA exceptions, high-risk cases, decision-write errors.</p></div>
+          <div class="card"><h3>Weekly</h3><p>Case outcomes, false positives, evidence gaps, investigator feedback, defect trends.</p></div>
+          <div class="card"><h3>Monthly / change</h3><p>Score distribution, drift, calibration, access review, control evidence, benefit realisation.</p></div>
+        </div>
+        <h3>RAID register and open decisions</h3>
+        <table>
+          <thead><tr><th>Type</th><th>Item</th><th>Response / decision needed</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr><td>Risk</td><td>Country/sector features create unfair or stigmatising outcomes</td><td>Use only in combination; perform fairness and adverse-outcome review</td><td>Typology + model risk</td></tr>
+            <tr><td>Risk</td><td>Shared device/IP has benign explanations</td><td>Require network and transaction corroboration; expose contrary evidence</td><td>AML product</td></tr>
+            <tr><td>Risk</td><td>Generated narrative overstates suspicion</td><td>Grounded prompt, deterministic fallback, reviewer validation, evaluation suite</td><td>AI governance</td></tr>
+            <tr><td>Assumption</td><td>Stable account identifiers link the source domains</td><td>Formalise data contracts and identity resolution</td><td>Data owner</td></tr>
+            <tr><td>Dependency</td><td>External-intelligence licensing and permissible use</td><td>Confirm sources, retention, citations, and redistribution rights</td><td>Compliance / procurement</td></tr>
+            <tr><td>Decision</td><td>Jurisdiction and SAR hand-off integration</td><td>Select target policy, authorised users, and filing boundary before production</td><td>MLRO delegate</td></tr>
+            <tr><td>Decision</td><td>Production SLO, RTO, RPO, and retention periods</td><td>Set from case criticality and enterprise policy</td><td>Service owner</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="business-case">
+        <div class="eyebrow">19 · Benefits</div>
+        <h2>Build the business case from measured handling time and quality—not unsupported promises.</h2>
+        <p class="lead">The calculator below is illustrative. Replace every default with baseline and pilot measurements from the target operating unit. Results estimate capacity value, not headcount removal or guaranteed savings.</p>
+        <div class="calculator" aria-label="Illustrative business case calculator">
+          <label>Cases reviewed per month<input id="cases" type="number" min="0" value="500"></label>
+          <label>Current minutes per case<input id="before-min" type="number" min="1" value="180"></label>
+          <label>Assisted minutes per case<input id="after-min" type="number" min="1" value="60"></label>
+          <label>Loaded analyst cost / hour<input id="hour-cost" type="number" min="0" value="65"></label>
+        </div>
+        <div class="result-rail">
+          <div class="result"><b id="hours-result">1,000</b><span>hours of monthly capacity released</span></div>
+          <div class="result"><b id="annual-result">$780,000</b><span>illustrative annual capacity value</span></div>
+          <div class="result"><b id="reduction-result">66.7%</b><span>active handling-time reduction</span></div>
+        </div>
+        <h3>Pilot KPI framework</h3>
+        <table>
+          <thead><tr><th>KPI</th><th>Definition</th><th>Baseline source</th><th>Pilot success method</th></tr></thead>
+          <tbody>
+            <tr><td>Active handling time</td><td>Analyst minutes actively spent per completed case</td><td>Time study / workflow telemetry</td><td>Compare matched case cohorts</td></tr>
+            <tr><td>Time to first insight</td><td>Alert creation to first evidence-backed hypothesis</td><td>Case timestamps</td><td>Median and 90th percentile</td></tr>
+            <tr><td>Evidence completeness</td><td>Required sources assessed before decision</td><td>Quality sample</td><td>Percentage meeting checklist</td></tr>
+            <tr><td>Decision rework</td><td>Cases returned or reopened for missing/weak evidence</td><td>Case outcomes</td><td>Rate and reason distribution</td></tr>
+            <tr><td>Explainability coverage</td><td>Score points with accessible evidence and rationale</td><td>Automated trace test</td><td>Target defined by governance</td></tr>
+            <tr><td>Audit completeness</td><td>Decisions with actor, time, rationale, object linkage</td><td>Audit query</td><td>Percentage complete</td></tr>
+            <tr><td>Investigator acceptance</td><td>Usefulness and trust rating from structured UAT</td><td>Survey / interviews</td><td>Agreed acceptance threshold</td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><strong>Benefits realisation method</strong>Establish the current-state baseline, run a controlled pilot with comparable case types, measure quality and time together, review adverse outcomes, then approve any scaled benefit claim.</div>
+      </section>
+
+      <section id="testing">
+        <div class="eyebrow">20 · Assurance</div>
+        <h2>Testing covers data, logic, workflow, security, usability, and resilience.</h2>
+        <table>
+          <thead><tr><th>Test layer</th><th>Minimum coverage</th><th>Prototype evidence</th><th>Production gate</th></tr></thead>
+          <tbody>
+            <tr><td>Static / packaging</td><td>Python compile, HTML integrity, expected files</td><td>Local validation</td><td>CI pipeline</td></tr>
+            <tr><td>Data quality</td><td>Schema, required fields, JSON, referential links, duplicate keys</td><td>CSV validation</td><td>Automated load quarantine</td></tr>
+            <tr><td>Rule unit tests</td><td>Positive, negative, boundary for each typology</td><td>C003 positive + C010 negative</td><td>Versioned test fixtures</td></tr>
+            <tr><td>Score regression</td><td>Score, band, evidence strength, route, breakdown</td><td>Six SQL assertions</td><td>Golden-case suite</td></tr>
+            <tr><td>Workflow integration</td><td>All tabs, decision options, rollback, cache refresh</td><td>Demo smoke test</td><td>Automated end-to-end suite</td></tr>
+            <tr><td>Security</td><td>Role isolation, masking, injection, secrets, access logs</td><td>Design only</td><td>Mandatory security test</td></tr>
+            <tr><td>Performance</td><td>Interactive case load and concurrent reviewer volume</td><td>Not benchmarked</td><td>Load test against SLO</td></tr>
+            <tr><td>UAT</td><td>Realistic workflow, narrative quality, explainability, safeguarding</td><td>Demo script</td><td>Named investigator/risk sign-off</td></tr>
+          </tbody>
+        </table>
+        <h3>Release acceptance criteria</h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-check="accept-build"><span>All ordered SQL files execute without error in the target environment</span></li>
+          <li><input type="checkbox" data-check="accept-tests"><span>All automated and golden-case tests pass</span></li>
+          <li><input type="checkbox" data-check="accept-score"><span>CASE-C003 reconciles to 92 and CASE-C010 remains LOW</span></li>
+          <li><input type="checkbox" data-check="accept-decision"><span>Every allowed decision writes exactly one linked audit event</span></li>
+          <li><input type="checkbox" data-check="accept-control"><span>Human gate, access, data, prompt, and rollback controls are evidenced</span></li>
+          <li><input type="checkbox" data-check="accept-runbook"><span>Deployment, rollback, incident, and service-owner details are current</span></li>
+        </ul>
+      </section>
+
+      <section id="coco">
+        <div class="eyebrow">21 · Hackathon evidence</div>
+        <h2>Use CoCo CLI deliberately</h2>
+        <p class="lead">CoCo’s executable is <code>cortex</code>. Run it in plan mode from the repository root so Snowflake writes remain reviewable.</p>
+        <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>cortex -c shadowtrace -w . --plan</code></pre></div>
+        <div class="grid two">
+          <div class="card"><h3>Recommended activities</h3>
+            <ol>
+              <li>Inspect live schema drift.</li>
+              <li>Execute each typology for CASE-C003.</li>
+              <li>Reconcile all 92 score points.</li>
+              <li>Review the Streamlit implementation.</li>
+              <li>Debug failed Snowflake queries.</li>
+              <li>Summarize evidence with query IDs.</li>
+            </ol>
+          </div>
+          <div class="card"><h3>Evidence to retain</h3>
+            <ul>
+              <li>Prompt and response screenshot</li>
+              <li>Snowflake query ID</li>
+              <li>Before/after diff for a real correction</li>
+              <li>Six PASS test output</li>
+              <li>No secrets or personal data visible</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout"><strong>Prompt source</strong>Use the prepared prompt journal in <code>coco/prompts.md</code> and workflow in <code>coco/workflow.md</code>. Do not fabricate output; capture the connected session.</div>
+      </section>
+
+      <section id="demo">
+        <div class="eyebrow">22 · Presentation</div>
+        <h2>Run the five-minute happy-path demo</h2>
+        <table>
+          <thead><tr><th>Time</th><th>Activity</th><th>Judge-visible proof</th></tr></thead>
+          <tbody>
+            <tr><td>0:00</td><td>State the fragmented AML investigation problem</td><td>One-line value proposition</td></tr>
+            <tr><td>0:35</td><td>Run the typology query in Snowsight</td><td>Five detected rows</td></tr>
+            <tr><td>1:10</td><td>Open Streamlit and select CASE-C003</td><td>92/100 CRITICAL</td></tr>
+            <tr><td>1:45</td><td>Trace employer → workers → controller → funnel</td><td>Interactive network graph</td></tr>
+            <tr><td>2:30</td><td>Show documents and external intelligence</td><td>Multi-source evidence</td></tr>
+            <tr><td>3:10</td><td>Explain every score component</td><td>Transparent 92-point breakdown</td></tr>
+            <tr><td>3:45</td><td>Show the case brief and grounded prompt</td><td>Actionable copilot narrative</td></tr>
+            <tr><td>4:20</td><td>Record Escalate to SAR</td><td>Named human decision gate</td></tr>
+            <tr><td>4:45</td><td>Open Audit Trail</td><td>Linked decision and audit event</td></tr>
+          </tbody>
+        </table>
+        <h3>Reviewer input</h3>
+        <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>Reviewer: AML Demo Reviewer
+Decision: Escalate to SAR
+Rationale: Multi-source evidence supports escalation for formal SAR assessment.
+Acknowledgement: Checked</code></pre></div>
+        <div class="callout warning"><strong>Use careful language</strong>Say “indicators,” “suspicion hypothesis,” and “requires investigation.” Do not state that exploitation or guilt has been proven.</div>
+      </section>
+
+      <section id="deploy">
+        <div class="eyebrow">23 · Snowflake-native deployment</div>
+        <h2>Deploy Streamlit inside Snowflake</h2>
+        <p>Local execution is sufficient for development. For the strongest submission, deploy the app natively.</p>
+        <div class="step"><div class="step-number">1</div><div><h3>Set the correct warehouse</h3><p>Edit <code>sql/07_deploy_streamlit.sql</code> and replace <code>COMPUTE_WH</code> if your warehouse has another name.</p></div></div>
+        <div class="step"><div class="step-number">2</div><div>
+          <h3>Deploy</h3>
+          <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>snow sql -c shadowtrace -f sql/07_deploy_streamlit.sql</code></pre></div>
+        </div></div>
+        <div class="step"><div class="step-number">3</div><div>
+          <h3>Open in Snowsight</h3>
+          <p>Navigate to Streamlit and open <code>SHADOWTRACE_AI.AML.SHADOWTRACEAI_APP</code>. Re-run the happy path in the hosted application.</p>
+        </div></div>
+        <h3>Production deployment runbook</h3>
+        <table>
+          <thead><tr><th>Phase</th><th>Required activity</th><th>Evidence / owner</th></tr></thead>
+          <tbody>
+            <tr><td>Pre-deploy</td><td>Approved change, reviewed diff, passing tests, backup/rollback point, warehouse/cost check</td><td>Release owner</td></tr>
+            <tr><td>Deploy</td><td>Apply versioned schema changes before dependent views/app; capture query IDs</td><td>Engineering</td></tr>
+            <tr><td>Smoke</td><td>Load C003/C010, open all tabs, record non-regulatory demo decision, verify audit linkage</td><td>Engineering + product</td></tr>
+            <tr><td>Observe</td><td>Monitor errors, query latency, freshness, score distribution, decision writes</td><td>Service owner</td></tr>
+            <tr><td>Release</td><td>Communicate version, known limitations, support contact, and evidence pack</td><td>Product owner</td></tr>
+          </tbody>
+        </table>
+        <h3>Rollback principle</h3>
+        <p>Stop new reviewer decisions, restore the last approved app/view version, validate core reads and audit writes, reconcile any in-flight case activity, document impact, and reopen only after owner approval. Never delete production audit history as a rollback mechanism.</p>
+      </section>
+
+      <section id="evidence">
+        <div class="eyebrow">24 · Submission package</div>
+        <h2>Capture credible execution evidence</h2>
+        <p class="lead">Screenshots should prove SQL, data, application, reviewer action, and audit persistence—not merely show a visual mockup.</p>
+        <ul class="checklist">
+          <li><input type="checkbox" data-check="shot-objects"><span>Snowflake tables and views under <code>SHADOWTRACE_AI.AML</code></span></li>
+          <li><input type="checkbox" data-check="shot-signals"><span>Five CASE-C003 typology result rows</span></li>
+          <li><input type="checkbox" data-check="shot-overview"><span>Streamlit Overview showing 92/100 CRITICAL</span></li>
+          <li><input type="checkbox" data-check="shot-network"><span>Employer/worker/controller/funnel network</span></li>
+          <li><input type="checkbox" data-check="shot-evidence"><span>Documents and external intelligence</span></li>
+          <li><input type="checkbox" data-check="shot-risk"><span>Explainable risk breakdown</span></li>
+          <li><input type="checkbox" data-check="shot-brief"><span>Case intelligence brief</span></li>
+          <li><input type="checkbox" data-check="shot-decision"><span>Reviewer decision and resulting audit row</span></li>
+          <li><input type="checkbox" data-check="shot-coco"><span>CoCo CLI output with query ID</span></li>
+        </ul>
+        <div class="callout success"><strong>Recommended format</strong>Capture at 1440×900 or larger, keep the case ID visible, hide credentials, and use the filenames specified in <code>docs/screenshots/README.md</code>.</div>
+      </section>
+
+      <section id="troubleshooting">
+        <div class="eyebrow">25 · Recovery guide</div>
+        <h2>Troubleshooting</h2>
+        <details><summary><code>snow</code> is not recognized</summary><div>Restart PowerShell after installing the CLI, run <code>pipx ensurepath</code>, or install <code>snowflake-cli</code> inside the active virtual environment.</div></details>
+        <details><summary>PowerShell blocks virtual-environment activation</summary><div>Run <code>Set-ExecutionPolicy -Scope Process Bypass</code>, then activate <code>.\.venv\Scripts\Activate.ps1</code>. This change applies only to the current process.</div></details>
+        <details><summary>Snowflake authentication or MFA repeatedly fails</summary><div>Test the connection independently with <code>snow connection test -c shadowtrace</code>. Prefer external-browser authentication or your organization’s approved programmatic access token.</div></details>
+        <details><summary><code>CREATE DATABASE</code> or <code>CREATE STREAMLIT</code> is denied</summary><div>Use a role with the required privileges or ask an administrator to pre-create the database/schema and grant ownership or appropriate create privileges.</div></details>
+        <details><summary>The CSV <code>PUT</code> command cannot find files</summary><div>Run <code>02_load_seed_data.sql</code> from the repository root. Confirm <code>Get-ChildItem data\seed</code> lists all six CSV files.</div></details>
+        <details><summary>Streamlit shows “connection or setup is incomplete”</summary><div>Verify <code>.streamlit/secrets.toml</code>, test <code>SELECT 1</code> through the CLI, and confirm all six build scripts completed in order.</div></details>
+        <details><summary>CASE-C003 is not 92</summary><div>Re-run the seed loader, typology views, and risk scoring scripts. Execute <code>tests/test_risk_logic.sql</code> and inspect the first failing assertion rather than changing the expected score.</div></details>
+        <details><summary>The optional Cortex view fails</summary><div>Continue using the deterministic brief. Confirm model availability, cross-region inference, and the <code>SNOWFLAKE.CORTEX_USER</code> database role before retrying.</div></details>
+        <details><summary>Plotly or Streamlit dependency error</summary><div>Confirm the virtual environment is active, then run <code>pip install -r requirements.txt</code> and restart Streamlit.</div></details>
+      </section>
+
+      <section id="reset">
+        <div class="eyebrow">26 · Repeatable demos</div>
+        <h2>Reset the reviewer activity</h2>
+        <p>Use this only on the synthetic demo database.</p>
+        <div class="code-wrap"><button class="copy" type="button">Copy</button><pre><code>DELETE FROM SHADOWTRACE_AI.AML.audit_events
+WHERE case_id = 'CASE-C003' AND event_type = 'REVIEWER_DECISION';
+
+DELETE FROM SHADOWTRACE_AI.AML.case_decisions
+WHERE case_id = 'CASE-C003';
+
+UPDATE SHADOWTRACE_AI.AML.case_alerts
+SET alert_status = 'OPEN', assigned_to = 'AML_DEMO_REVIEWER'
+WHERE case_id = 'CASE-C003';</code></pre></div>
+        <div class="callout danger"><strong>Scope warning</strong>Do not run reset SQL against real AML data. The commands intentionally target the synthetic CASE-C003 identifier.</div>
+      </section>
+
+      <section id="checklist">
+        <div class="eyebrow">27 · Completion gate</div>
+        <h2>Final activity checklist</h2>
+        <div class="grid two">
+          <div class="card"><h3>Technical</h3>
+            <ul class="checklist">
+              <li><input type="checkbox" data-check="final-schema"><span>Schema and seed load completed</span></li>
+              <li><input type="checkbox" data-check="final-tests"><span>All six SQL tests pass</span></li>
+              <li><input type="checkbox" data-check="final-local"><span>Local app works across eight tabs</span></li>
+              <li><input type="checkbox" data-check="final-decision"><span>Decision creates linked audit event</span></li>
+              <li><input type="checkbox" data-check="final-hosted"><span>Snowflake-native app deployed</span></li>
+            </ul>
+          </div>
+          <div class="card"><h3>Submission</h3>
+            <ul class="checklist">
+              <li><input type="checkbox" data-check="final-coco"><span>Real CoCo activity captured</span></li>
+              <li><input type="checkbox" data-check="final-shots"><span>Screenshot set complete</span></li>
+              <li><input type="checkbox" data-check="final-demo"><span>Five-minute demo rehearsed</span></li>
+              <li><input type="checkbox" data-check="final-safety"><span>Human gate and responsible-use language included</span></li>
+              <li><input type="checkbox" data-check="final-secrets"><span>No credentials committed or visible</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout success"><strong>Finish line</strong>You are ready when the judges can see the source data, execute the SQL, understand every point in 92, navigate the evidence network, record a human decision, and verify its audit event.</div>
+      </section>
+
+      <footer class="footer">
+        <strong>ShadowTraceAI: AML Intelligence Copilot on Snowflake</strong><br>
+        Synthetic demonstration project · Domain-Specific AI Copilot track · Generated 25 July 2026
+        <p class="print-only">Repository: C:\Users\manoj\Development\Github\ShadowTraceAI-Snowflake-CoCo</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const key = "shadowtrace-activity-guide";
+    document.querySelectorAll("[data-check]").forEach((box) => {
+      const state = JSON.parse(localStorage.getItem(key) || "{}");
+      box.checked = Boolean(state[box.dataset.check]);
+      box.addEventListener("change", () => {
+        const next = JSON.parse(localStorage.getItem(key) || "{}");
+        next[box.dataset.check] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+    document.querySelectorAll(".copy").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const text = button.parentElement.querySelector("code").innerText;
+        await navigator.clipboard.writeText(text);
+        const original = button.textContent;
+        button.textContent = "Copied";
+        setTimeout(() => button.textContent = original, 1200);
+      });
+    });
+    function resetChecklist() {
+      localStorage.removeItem(key);
+      document.querySelectorAll("[data-check]").forEach((box) => box.checked = false);
+    }
+    function updateBusinessCase() {
+      const cases = Math.max(0, Number(document.getElementById("cases")?.value || 0));
+      const before = Math.max(0, Number(document.getElementById("before-min")?.value || 0));
+      const after = Math.max(0, Number(document.getElementById("after-min")?.value || 0));
+      const hourlyCost = Math.max(0, Number(document.getElementById("hour-cost")?.value || 0));
+      const monthlyHours = Math.max(0, cases * (before - after) / 60);
+      const annualValue = monthlyHours * hourlyCost * 12;
+      const reduction = before > 0 ? Math.max(0, (before - after) / before * 100) : 0;
+      document.getElementById("hours-result").textContent = Math.round(monthlyHours).toLocaleString();
+      document.getElementById("annual-result").textContent = annualValue.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+      document.getElementById("reduction-result").textContent = reduction.toFixed(1) + "%";
+    }
+    ["cases", "before-min", "after-min", "hour-cost"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("input", updateBusinessCase);
+    });
+    updateBusinessCase();
+    const links = [...document.querySelectorAll("nav a")];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          links.forEach((link) => link.classList.toggle("active", link.hash === "#" + entry.target.id));
+        }
+      });
+    }, { rootMargin: "-20% 0px -68% 0px" });
+    document.querySelectorAll("main section[id]").forEach((section) => observer.observe(section));
+  </script>
+</body>
+</html>
