@@ -23,6 +23,10 @@ ORDER BY risk_points DESC;
 Point out all five typologies and that each signal is a view over seeded
 transaction/KYC/device data.
 
+Open **AI & ML → Agents** and show `SHADOWTRACE_AML_ORCHESTRATOR`. Open its
+configuration and point out the five governed custom tools and sample
+questions.
+
 ## 1:10 — Open the investigation workspace
 
 Open the native Streamlit app and select `CASE-C003`. On **Overview**, show the
@@ -65,13 +69,29 @@ On **Risk Score**, walk through:
 | Document evidence | 4 |
 | **Total** | **92** |
 
-## 3:45 — Show the copilot brief
+## 3:40 — Show the copilot brief
 
 On **Case Intelligence Brief**, read the executive summary and suspicion
 hypothesis. Open the Cortex prompt expander to demonstrate grounded context and
 the deterministic fallback.
 
-## 4:20 — Complete the human workflow
+## 4:05 — Ask the Investigation Copilot
+
+Open the bottom-right **Ask ShadowTrace** chat popup and choose `Why is this case
+scored 92?`. Show
+the Risk Explanation Agent's grounded response and source citation. Next choose
+the full-review prompt and show the Orchestrator consulting all five specialist
+agents. Then ask `What
+evidence is missing?` and point out that the assistant recommends investigation
+steps but cannot record a decision or file a SAR.
+
+In a worksheet, insert a new synthetic transaction and show it moving through
+`TRANSACTIONS_CHANGE_STREAM`, `PROCESS_NEW_TRANSACTIONS_TASK`, and
+`VW_TRANSACTION_PROCESSING_STATUS`. Refresh Overview to show the processing
+event; the Cortex Agent tools now read the updated Snowflake evidence without
+Streamlit performing any processing.
+
+## 4:30 — Complete the human workflow
 
 On **Reviewer Decision**:
 
@@ -81,9 +101,10 @@ On **Reviewer Decision**:
 - acknowledge the human decision gate;
 - record the decision.
 
-## 4:45 — Prove auditability
+## 4:50 — Prove auditability
 
-Open **Audit Trail** and show the new `REVIEWER_DECISION` event. In Snowsight,
+Open **Audit Trail** and show the copilot message events plus the new
+`REVIEWER_DECISION` event. In Snowsight,
 run:
 
 ```sql
@@ -98,4 +119,3 @@ ORDER BY d.decided_at DESC;
 
 Close with: “One Snowflake evidence plane, one explainable score, and one
 audit-ready human decision.”
-

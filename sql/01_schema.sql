@@ -9,6 +9,7 @@ USE SCHEMA AML;
 CREATE OR REPLACE FILE FORMAT CSV_SEED_FORMAT
   TYPE = CSV
   PARSE_HEADER = TRUE
+  SKIP_BLANK_LINES = TRUE
   FIELD_OPTIONALLY_ENCLOSED_BY = '"'
   TRIM_SPACE = TRUE
   NULL_IF = ('', 'NULL');
@@ -160,3 +161,28 @@ CREATE TABLE IF NOT EXISTS case_intelligence_briefs (
   prompt_text VARCHAR
 );
 
+CREATE TABLE IF NOT EXISTS case_copilot_messages (
+  message_id VARCHAR PRIMARY KEY,
+  case_id VARCHAR NOT NULL,
+  session_id VARCHAR NOT NULL,
+  message_ts TIMESTAMP_TZ DEFAULT CURRENT_TIMESTAMP(),
+  message_role VARCHAR NOT NULL,
+  actor_name VARCHAR NOT NULL,
+  message_text VARCHAR NOT NULL,
+  source_objects ARRAY,
+  model_provider VARCHAR NOT NULL DEFAULT 'GOVERNED_RULES',
+  grounding_mode VARCHAR NOT NULL DEFAULT 'CURATED_SNOWFLAKE_OBJECTS'
+);
+
+CREATE TABLE IF NOT EXISTS case_agent_executions (
+  agent_execution_id VARCHAR PRIMARY KEY,
+  request_id VARCHAR NOT NULL,
+  case_id VARCHAR NOT NULL,
+  session_id VARCHAR NOT NULL,
+  agent_name VARCHAR NOT NULL,
+  executed_at TIMESTAMP_TZ DEFAULT CURRENT_TIMESTAMP(),
+  execution_status VARCHAR NOT NULL DEFAULT 'COMPLETED',
+  routing_reason VARCHAR,
+  agent_response VARCHAR,
+  source_objects ARRAY
+);

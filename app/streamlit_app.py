@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import uuid
 from typing import Any
 
 import pandas as pd
@@ -21,33 +22,118 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-      :root { --ink:#e8eef5; --muted:#8ea0b5; --cyan:#46d9d1; --red:#ff5368; }
-      .stApp { background:
-        radial-gradient(circle at 80% 0%, rgba(18,94,106,.22), transparent 28rem),
-        linear-gradient(150deg, #071019 0%, #0a1420 56%, #0e1825 100%); }
-      [data-testid="stSidebar"] { background:#08111b; border-right:1px solid #1e3446; }
-      h1,h2,h3 { letter-spacing:-.025em; }
-      .eyebrow { color:#46d9d1; font-size:.74rem; font-weight:700; letter-spacing:.14em; }
-      .hero { font-size:2.05rem; font-weight:750; line-height:1.08; color:#f4f8fb; margin:.2rem 0; }
-      .subtle { color:#8ea0b5; font-size:.92rem; }
-      .risk-card { border:1px solid #63313d; background:linear-gradient(135deg,#241721,#121722);
-        border-radius:14px; padding:1.1rem 1.2rem; }
-      .risk-score { color:#ff5368; font-size:2.3rem; font-weight:800; }
-      .risk-band { color:#ff8998; font-weight:700; letter-spacing:.09em; }
-      .brief-card { border-left:3px solid #46d9d1; background:#0c1925;
-        border-radius:0 12px 12px 0; padding:1rem 1.15rem; margin:.5rem 0 1rem; }
-      .signal-pill { display:inline-block; margin:.2rem .35rem .2rem 0; padding:.28rem .55rem;
-        border:1px solid #2f6570; border-radius:99px; color:#8fe8e2; font-size:.78rem; }
-      div[data-testid="stMetric"] { background:#0c1925; border:1px solid #193045;
-        padding:.75rem; border-radius:12px; }
-      div[data-testid="stDataFrame"] { border:1px solid #193045; border-radius:10px; }
-      .stButton>button, .stFormSubmitButton>button { border-radius:9px; font-weight:700; }
+      :root {
+        color-scheme:light; --navy:#102a43; --ink:#243b53; --muted:#627d98;
+        --teal:#0f766e; --teal-soft:#ecfdf8; --red:#b42318; --surface:#ffffff;
+        --canvas:#f4f7fa; --line:#d8e1ea; --shadow:0 8px 24px rgba(16,42,67,.055);
+      }
+      html, body, .stApp, [data-testid="stAppViewContainer"] { color-scheme:light; }
+      .stApp, [data-testid="stAppViewContainer"] {
+        background:linear-gradient(180deg,#f8fafc 0,#f4f7fa 30rem,#f4f7fa 100%); color:var(--ink); }
+      [data-testid="stHeader"] { background:rgba(248,250,252,.94); border-bottom:1px solid #e7edf3; }
+      [data-testid="stToolbar"] { color:var(--navy); }
+      [data-testid="stSidebar"] { background:#fff; border-right:1px solid var(--line);
+        box-shadow:8px 0 28px rgba(16,42,67,.035); }
+      [data-testid="stSidebar"] > div:first-child { padding-top:1.5rem; }
+      [data-testid="stSidebar"] hr { border-color:#e7edf3; }
+      [data-testid="stMainBlockContainer"] { max-width:1480px; padding-top:2rem; padding-bottom:4rem; }
+      h1,h2,h3,h4 { color:var(--navy); letter-spacing:-.025em; }
+      p, label, [data-testid="stCaptionContainer"] { color:var(--ink); }
+      a { color:var(--teal); }
+      .eyebrow { color:var(--teal); font-size:.72rem; font-weight:800; letter-spacing:.14em; }
+      .brand-title { color:var(--navy); font-size:1.12rem; font-weight:800; margin:.28rem 0 .15rem; }
+      .brand-copy { color:var(--muted); font-size:.78rem; line-height:1.45; }
+      .brand-mark { width:2.35rem; height:2.35rem; display:grid; place-items:center;
+        border:1px solid #9fd4cf; border-radius:.72rem; color:var(--teal); background:var(--teal-soft);
+        font-size:1.15rem; font-weight:800; }
+      .workspace-header { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem;
+        background:linear-gradient(135deg,#fff 0%,#f3f8fb 72%,#ecfdf8 100%);
+        border:1px solid var(--line); border-radius:1rem; padding:1.35rem 1.5rem; margin:0 0 1.15rem;
+        box-shadow:var(--shadow); }
+      .hero { font-size:2rem; font-weight:780; line-height:1.1; color:var(--navy); margin:.22rem 0 .25rem; }
+      .subtle { color:var(--muted); font-size:.9rem; }
+      .live-chip { flex:none; padding:.38rem .68rem; border:1px solid #a7d9d4; border-radius:99px;
+        color:#0b615b; background:#fff; font-size:.72rem; font-weight:750; white-space:nowrap; }
+      .risk-card { min-height:8.25rem; border:1px solid #f2b8b5;
+        background:linear-gradient(135deg,#fff7f6,#fff); border-radius:.85rem;
+        padding:1.05rem 1.15rem; box-shadow:0 6px 18px rgba(180,35,24,.045); }
+      .risk-score { color:var(--red); font-size:2.35rem; line-height:1.05; font-weight:820; }
+      .risk-band { color:#912018; font-size:.82rem; font-weight:800; letter-spacing:.09em; }
+      .brief-card { border:1px solid var(--line); border-left:3px solid var(--teal); background:#fff;
+        border-radius:0 .75rem .75rem 0; padding:1rem 1.1rem; margin:.45rem 0 1rem;
+        color:var(--ink); box-shadow:0 5px 16px rgba(16,42,67,.035); }
+      .signal-pill { display:inline-block; margin:.2rem .35rem .35rem 0; padding:.3rem .58rem;
+        border:1px solid #a7d9d4; border-radius:99px; color:#0b615b; background:var(--teal-soft);
+        font-size:.77rem; font-weight:650; }
+      div[data-testid="stMetric"] { min-height:8.25rem; background:#fff; border:1px solid var(--line);
+        padding:.85rem 1rem; border-radius:.85rem; box-shadow:var(--shadow); }
+      div[data-testid="stMetric"] label { color:var(--muted); font-weight:650; }
+      div[data-testid="stMetricValue"] { color:var(--navy); font-weight:780; }
+      div[data-testid="stDataFrame"] { color-scheme:light; background:#fff; border:1px solid var(--line);
+        border-radius:.75rem; overflow:hidden; box-shadow:0 5px 16px rgba(16,42,67,.035); }
+      div[data-testid="stDataFrame"] * { color-scheme:light; }
+      [data-testid="stTabs"] { margin-top:.15rem; }
+      [data-testid="stTabs"] [data-baseweb="tab-list"] { gap:.15rem; background:#fff;
+        border:1px solid var(--line); border-radius:.75rem; padding:.28rem .35rem; box-shadow:var(--shadow); }
+      [data-testid="stTabs"] [data-baseweb="tab"] { color:#526d82; border-radius:.5rem; padding:.55rem .78rem; }
+      [data-testid="stTabs"] [aria-selected="true"] { color:#0b615b; background:#eaf7f5; font-weight:750; }
+      [data-testid="stTabs"] [data-baseweb="tab-highlight"] { background-color:var(--teal); }
+      [data-testid="stForm"] { background:#fff; border:1px solid var(--line); border-radius:.85rem;
+        padding:1rem 1.1rem; box-shadow:var(--shadow); }
+      [data-baseweb="input"] > div, [data-baseweb="textarea"] > div,
+      [data-baseweb="select"] > div { background:#fff; border-color:#b8c7d5; color:var(--navy); }
+      [data-baseweb="popover"], [role="listbox"] { color-scheme:light; background:#fff; color:var(--ink); }
+      [data-testid="stExpander"] { background:#fff; border:1px solid var(--line); border-radius:.75rem; }
+      [data-testid="stChatMessage"] { background:#fff; border:1px solid var(--line);
+        border-radius:.85rem; padding:.2rem .45rem; box-shadow:0 4px 14px rgba(16,42,67,.035); }
+      [data-testid="stChatInput"] { background:#fff; border-color:#a7b9c8; }
+      .copilot-banner { border:1px solid #a7d9d4; background:linear-gradient(135deg,#fff,#ecfdf8);
+        border-radius:.9rem; padding:1rem 1.1rem; margin:.25rem 0 1rem; box-shadow:var(--shadow); }
+      .copilot-title { color:var(--navy); font-size:1.05rem; font-weight:780; margin-bottom:.25rem; }
+      .source-chip { display:inline-block; margin:.15rem .28rem .1rem 0; padding:.22rem .48rem;
+        border:1px solid #c9d7e3; border-radius:99px; color:#526d82; background:#f8fafc;
+        font-family:monospace; font-size:.68rem; }
+      .st-key-chat_launcher { position:fixed; right:1.45rem; bottom:1.35rem; z-index:999999; }
+      .st-key-chat_launcher button { min-height:3.25rem; padding:.75rem 1.05rem;
+        border-radius:999px; border:1px solid #0b615b; background:var(--teal); color:#fff;
+        box-shadow:0 12px 30px rgba(15,118,110,.28); font-size:.86rem; }
+      .st-key-chat_launcher button:hover { background:#0b615b; border-color:#094f4a; color:#fff; }
+      div[data-testid="stDialog"] { background:rgba(16,42,67,.04); }
+      div[data-testid="stDialog"] div[role="dialog"] { position:fixed; right:1.4rem; bottom:5.2rem;
+        top:auto; left:auto; width:min(430px,calc(100vw - 2rem));
+        height:min(680px,calc(100dvh - 6.6rem)); max-height:calc(100dvh - 6.6rem); overflow:hidden;
+        margin:0; border:1px solid var(--line); border-radius:1rem;
+        box-shadow:0 22px 60px rgba(16,42,67,.2); }
+      div[data-testid="stDialog"] div[role="dialog"] > div { max-height:100%; overflow-y:auto;
+        overscroll-behavior:contain; }
+      div[data-testid="stDialog"] [data-testid="stDialogBody"] { max-height:calc(100dvh - 10.5rem);
+        overflow-y:auto; overscroll-behavior:contain; padding-bottom:1rem; scrollbar-gutter:stable; }
+      div[data-testid="stDialog"] [data-testid="stDialogBody"]::-webkit-scrollbar { width:8px; }
+      div[data-testid="stDialog"] [data-testid="stDialogBody"]::-webkit-scrollbar-thumb {
+        background:#b8c7d5; border-radius:99px; }
+      div[data-testid="stDialog"] [data-testid="stChatMessage"] { box-shadow:none; }
+      div[data-testid="stDialog"] [data-testid="stForm"] { padding:.55rem .6rem;
+        margin-bottom:.25rem; border-color:#c9d7e3; box-shadow:none; }
+      div[data-testid="stDialog"] [data-testid="stForm"] .stButton button { min-height:2.55rem; }
+      [data-testid="stAlert"] { border-radius:.7rem; border-width:1px; }
+      .stButton>button, .stFormSubmitButton>button, .stDownloadButton>button {
+        border-radius:.55rem; font-weight:720; border-color:#9bb0c2; background:#fff; color:var(--navy); }
+      .stButton>button:hover, .stDownloadButton>button:hover { border-color:var(--teal); color:var(--teal); }
+      .stFormSubmitButton>button[kind="primary"] { background:var(--teal); border-color:var(--teal); color:#fff; }
+      code, pre { color-scheme:light; }
+      @media (max-width:900px) { .workspace-header { align-items:flex-start; flex-direction:column; }
+        .hero { font-size:1.65rem; }
+        .st-key-chat_launcher { right:.85rem; bottom:.85rem; }
+        div[data-testid="stDialog"] div[role="dialog"] { right:.75rem; bottom:4.7rem;
+          width:calc(100vw - 1.5rem); height:calc(100dvh - 5.7rem); max-height:calc(100dvh - 5.7rem); }
+        div[data-testid="stDialog"] [data-testid="stDialogBody"] { max-height:calc(100dvh - 9.5rem); } }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 DB = "SHADOWTRACE_AI.AML"
+CORTEX_AGENT = "SHADOWTRACE_AI.AML.SHADOWTRACE_AML_ORCHESTRATOR"
 
 
 @st.cache_resource
@@ -82,6 +168,308 @@ def parse_semistructured(value: Any) -> Any:
         return json.loads(str(value))
     except (TypeError, json.JSONDecodeError):
         return value
+
+
+def money(value: Any) -> str:
+    try:
+        return f"{float(value):,.2f}"
+    except (TypeError, ValueError):
+        return "0.00"
+
+
+def signal_row(signals: pd.DataFrame, name: str) -> pd.Series | None:
+    matches = signals[signals["signal_type"].str.lower() == name.lower()]
+    return None if matches.empty else matches.iloc[0]
+
+
+def agent_result(name: str, response: str, sources: list[str], reason: str) -> dict[str, Any]:
+    return {"agent": name, "response": response, "sources": sources, "routing_reason": reason}
+
+
+def risk_explanation_agent(case_id: str, risk: pd.Series) -> dict[str, Any]:
+    score = int(risk["risk_score"])
+    route = str(risk["recommended_route"]).replace("_", " ").title()
+    breakdown = parse_semistructured(risk["score_breakdown"])
+    factors = []
+    if isinstance(breakdown, dict):
+        factors = sorted(breakdown.items(), key=lambda item: float(item[1]), reverse=True)
+    factor_text = "; ".join(
+        f"**{str(name).replace('_', ' ').title()}** contributes **{int(points)} points**"
+        for name, points in factors
+    )
+    response = (
+        f"{case_id} is scored **{score}/100 ({risk['risk_band']})** with "
+        f"**{risk['evidence_strength']}** evidence. {factor_text}. "
+        f"The resulting route is **{route}**, subject to a named reviewer's decision."
+    )
+    return agent_result("Risk Explanation Agent", response, ["vw_case_risk_summary"], "Risk or score explanation requested")
+
+
+def typology_detection_agent(question: str, signals: pd.DataFrame, transactions: pd.DataFrame) -> dict[str, Any]:
+    prompt = question.lower()
+    if any(term in prompt for term in ("wage", "payroll", "harvest")):
+        row = signal_row(signals, "WAGE_HARVESTING")
+        explanation = scalar(row["explanation"]) if row is not None else "No wage-harvesting signal was detected."
+        points = int(row["risk_points"]) if row is not None else 0
+        return agent_result(
+            "Typology Detection Agent",
+            f"The wage-harvesting detector contributes **{points} points**. {explanation}",
+            ["vw_wage_harvesting_signals", "vw_all_typology_signals", "transactions"],
+            "Wage-harvesting or payroll pattern requested",
+        )
+    if any(term in prompt for term in ("transaction", "spending", "amount", "payment")):
+        if transactions.empty:
+            summary = "No scoped transactions are available for this case."
+        else:
+            highest = transactions.sort_values("amount", ascending=False).iloc[0]
+            total = transactions["amount"].astype(float).sum()
+            summary = (
+                f"The scoped dataset contains **{len(transactions)} transactions** totalling "
+                f"**{money(total)}**. The largest is **{money(highest['amount'])} {highest['currency']}** "
+                f"for {scalar(highest['description'])}."
+            )
+        anomaly = signal_row(signals, "SPENDING_ANOMALY")
+        anomaly_text = scalar(anomaly["explanation"]) if anomaly is not None else ""
+        return agent_result(
+            "Typology Detection Agent",
+            f"{summary} {anomaly_text}".strip(),
+            ["transactions", "vw_spending_anomaly_signals"],
+            "Transaction or spending-anomaly analysis requested",
+        )
+    if any(term in prompt for term in ("geograph", "country", "location", "jurisdiction")):
+        row = signal_row(signals, "GEOGRAPHIC_RISK")
+        countries = sorted(set(transactions["counterparty_country"].dropna().astype(str)))
+        explanation = scalar(row["explanation"]) if row is not None else "No geographic-risk signal was detected."
+        return agent_result(
+            "Typology Detection Agent",
+            f"Observed counterparty countries are **{', '.join(countries) or 'not available'}**. {explanation}",
+            ["vw_geographic_risk_signals", "transactions", "device_ip_signals"],
+            "Geographic-risk analysis requested",
+        )
+    detected = signals[signals["signal_detected"] == True]  # noqa: E712
+    summary = "; ".join(
+        f"**{row.signal_type.replace('_', ' ').title()}** (+{int(row.risk_points)}): {row.explanation}"
+        for row in detected.itertuples()
+    ) or "No active typology signals were detected."
+    return agent_result(
+        "Typology Detection Agent",
+        summary,
+        ["vw_all_typology_signals"],
+        "General typology assessment requested",
+    )
+
+
+def network_intelligence_agent(edges: pd.DataFrame, signals: pd.DataFrame) -> dict[str, Any]:
+    relationship_counts = edges["relationship_type"].value_counts().to_dict() if not edges.empty else {}
+    relationships = ", ".join(
+        f"{str(name).replace('_', ' ').title()} ({count})" for name, count in relationship_counts.items()
+    ) or "no material connections"
+    control = signal_row(signals, "ACCOUNT_CONTROL")
+    control_text = scalar(control["explanation"]) if control is not None else "No account-control signal was detected."
+    return agent_result(
+        "Network Intelligence Agent",
+        f"The case network contains **{len(edges)} evidence edges**: {relationships}. {control_text}",
+        ["vw_case_network", "vw_account_control_signals", "device_ip_signals"],
+        "Connected-account or control analysis requested",
+    )
+
+
+def evidence_review_agent(question: str, docs: pd.DataFrame, intel: pd.DataFrame, brief: pd.Series) -> dict[str, Any]:
+    prompt = question.lower()
+    if any(term in prompt for term in ("missing", "gap", "more evidence", "need next")):
+        response = (
+            f"The investigation brief identifies these evidence gaps: **{scalar(brief['missing_evidence'])}** "
+            "These should be obtained before treating the hypothesis as a concluded finding."
+        )
+    else:
+        reviewed = int((docs["review_status"].str.upper() == "REVIEWED").sum()) if not docs.empty else 0
+        high_intel = int((intel["risk_level"].str.upper() == "HIGH").sum()) if not intel.empty else 0
+        response = (
+            f"The case has **{len(docs)} document records** ({reviewed} reviewed) and "
+            f"**{len(intel)} external-intelligence matches** ({high_intel} high risk). "
+            f"The combined evidence summary is: {scalar(brief['evidence_summary'])}"
+        )
+    return agent_result(
+        "Evidence Review Agent",
+        response,
+        ["document_evidence", "external_watchlist", "vw_case_intelligence_brief"],
+        "Document, external-intelligence, or evidence-gap review requested",
+    )
+
+
+def case_brief_agent(question: str, account_name: str, risk: pd.Series, brief: pd.Series) -> dict[str, Any]:
+    prompt = question.lower()
+    route = str(risk["recommended_route"]).replace("_", " ").title()
+    if any(term in prompt for term in ("action", "recommend", "decision", "sar", "what should")):
+        response = (
+            f"The explainable model recommends **{route}**. {scalar(brief['recommended_action'])} "
+            "This is decision support only; use the **Reviewer Decision** tab for the accountable human decision."
+        )
+    elif any(term in prompt for term in ("hypothesis", "suspicion")):
+        response = scalar(brief["suspicion_hypothesis"])
+    else:
+        response = f"For **{account_name}**: {scalar(brief['executive_summary'])}"
+    return agent_result(
+        "Case Brief Agent",
+        response,
+        ["vw_case_intelligence_brief", "vw_case_risk_summary"],
+        "Narrative, hypothesis, or recommended-action support requested",
+    )
+
+
+def orchestrate_case_question(
+    question: str,
+    case_id: str,
+    account_name: str,
+    risk: pd.Series,
+    signals: pd.DataFrame,
+    edges: pd.DataFrame,
+    docs: pd.DataFrame,
+    intel: pd.DataFrame,
+    transactions: pd.DataFrame,
+    brief: pd.Series,
+) -> dict[str, Any]:
+    """Route a case question to bounded specialist agents and synthesize their outputs."""
+    prompt = question.lower().strip()
+    selected: list[str] = []
+    if any(term in prompt for term in ("score", "risk", "92", "critical", "points", "band")):
+        selected.append("risk")
+    if any(term in prompt for term in ("typology", "typologies", "wage", "payroll", "harvest", "transaction", "spending", "amount", "payment", "geograph", "country", "location", "jurisdiction", "sector")):
+        selected.append("typology")
+    if any(term in prompt for term in ("network", "connected", "controller", "account control", "shared device", "funnel", "cash-out")):
+        selected.append("network")
+    if any(term in prompt for term in ("document", "watchlist", "adverse", "media", "evidence", "missing", "gap", "need next")):
+        selected.append("evidence")
+    if any(term in prompt for term in ("summary", "summarise", "summarize", "brief", "hypothesis", "suspicion", "action", "recommend", "decision", "sar", "what should")):
+        selected.append("brief")
+    if not selected:
+        selected = ["risk", "brief"]
+
+    handlers = {
+        "risk": lambda: risk_explanation_agent(case_id, risk),
+        "typology": lambda: typology_detection_agent(question, signals, transactions),
+        "network": lambda: network_intelligence_agent(edges, signals),
+        "evidence": lambda: evidence_review_agent(question, docs, intel, brief),
+        "brief": lambda: case_brief_agent(question, account_name, risk, brief),
+    }
+    contributions = [handlers[name]() for name in dict.fromkeys(selected)]
+    agent_names = [item["agent"] for item in contributions]
+    sources = list(dict.fromkeys(source for item in contributions for source in item["sources"]))
+    sections = "\n\n".join(f"**{item['agent']}**\n\n{item['response']}" for item in contributions)
+    answer = (
+        f"_Case Orchestrator routed this question to {len(contributions)} specialist agent(s): "
+        f"{', '.join(agent_names)}._\n\n{sections}"
+    )
+    return {
+        "answer": answer,
+        "sources": sources,
+        "agents": agent_names,
+        "contributions": contributions,
+        "routing_reason": f"Matched governed intent routes: {', '.join(dict.fromkeys(selected))}",
+    }
+
+
+def record_copilot_message(
+    case_id: str,
+    session_id: str,
+    role: str,
+    actor: str,
+    text: str,
+    sources: list[str],
+) -> None:
+    query(
+        f"CALL {DB}.sp_record_copilot_message(?, ?, ?, ?, ?, ?)",
+        [case_id, session_id, role, actor, text, ",".join(sources)],
+    )
+
+
+def record_agent_execution(
+    request_id: str,
+    case_id: str,
+    session_id: str,
+    agent_name: str,
+    routing_reason: str,
+    response: str,
+    sources: list[str],
+) -> None:
+    query(
+        f"CALL {DB}.sp_record_agent_execution(?, ?, ?, ?, ?, ?, ?)",
+        [request_id, case_id, session_id, agent_name, routing_reason, response, ",".join(sources)],
+    )
+
+
+def run_cortex_agent(question: str, case_id: str) -> dict[str, Any]:
+    """Run the first-class Snowflake Cortex Agent and normalize its tool trace."""
+    request_body = json.dumps(
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": f"Active case is {case_id}. {question}",
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    response_frame = query(
+        f"SELECT TRY_PARSE_JSON(SNOWFLAKE.CORTEX.DATA_AGENT_RUN('{CORTEX_AGENT}', ?)) AS agent_response",
+        [request_body],
+    )
+    payload = parse_semistructured(response_frame.iloc[0]["agent_response"])
+    if not isinstance(payload, dict) or payload.get("status") not in (None, "completed"):
+        raise RuntimeError("Cortex Agent did not return a completed response.")
+
+    content = payload.get("content", [])
+    answer_parts = [str(item["text"]) for item in content if isinstance(item, dict) and item.get("type") == "text" and item.get("text")]
+    tool_names = []
+    for item in content:
+        if not isinstance(item, dict):
+            continue
+        tool_use = item.get("tool_use")
+        if isinstance(tool_use, dict) and tool_use.get("name"):
+            tool_names.append(str(tool_use["name"]))
+    if not answer_parts:
+        raise RuntimeError("Cortex Agent returned no final text response.")
+
+    tool_agents = {
+        "risk_explanation": ("Risk Explanation Agent", ["vw_case_risk_summary"]),
+        "typology_detection": ("Typology Detection Agent", ["vw_all_typology_signals"]),
+        "network_intelligence": ("Network Intelligence Agent", ["vw_case_network", "device_ip_signals"]),
+        "evidence_review": ("Evidence Review Agent", ["document_evidence", "external_watchlist"]),
+        "case_brief": ("Case Brief Agent", ["vw_case_intelligence_brief"]),
+    }
+    contributions = []
+    for tool_name in dict.fromkeys(tool_names):
+        if tool_name not in tool_agents:
+            continue
+        agent_name, source_objects = tool_agents[tool_name]
+        contributions.append(
+            agent_result(
+                agent_name,
+                f"Snowflake Cortex Agent invoked the `{tool_name}` governed custom tool for {case_id}.",
+                source_objects,
+                f"Selected by the Cortex Agent orchestration plan as tool `{tool_name}`",
+            )
+        )
+    sources = list(dict.fromkeys(source for item in contributions for source in item["sources"]))
+    agent_names = [item["agent"] for item in contributions]
+    answer = (
+        f"_Snowflake Cortex Agent orchestration completed"
+        f"{f' using {', '.join(agent_names)}' if agent_names else ''}._\n\n"
+        + "\n\n".join(answer_parts)
+    )
+    return {
+        "answer": answer,
+        "sources": sources,
+        "agents": agent_names,
+        "contributions": contributions,
+        "routing_reason": f"First-class Cortex Agent selected tools: {', '.join(dict.fromkeys(tool_names)) or 'none'}",
+        "backend": "SNOWFLAKE_CORTEX_AGENT",
+    }
 
 
 @st.cache_data(ttl=30, show_spinner=False)
@@ -149,12 +537,12 @@ def network_chart(edges: pd.DataFrame, primary: str, names: dict[str, str]) -> g
         )
 
     role_colors = {
-        "Primary employer": "#46d9d1",
-        "Worker": "#5fa8ff",
-        "Controller": "#f0a14a",
-        "Funnel": "#ff697c",
-        "Cash-out": "#9c6cff",
-        "Connected": "#8ea0b5",
+        "Primary employer": "#0f766e",
+        "Worker": "#2563eb",
+        "Controller": "#d97706",
+        "Funnel": "#be123c",
+        "Cash-out": "#7c3aed",
+        "Connected": "#64748b",
     }
     for role, color in role_colors.items():
         role_nodes = [node for node in ordered if role_for(node, primary, edges) == role]
@@ -168,10 +556,10 @@ def network_chart(edges: pd.DataFrame, primary: str, names: dict[str, str]) -> g
                 name=role,
                 text=[names.get(node, node) for node in role_nodes],
                 textposition="bottom center",
-                textfont={"color": "#dbe7f0", "size": 10},
+                textfont={"color": "#243b53", "size": 10},
                 hovertext=[f"{node}<br>{role}" for node in role_nodes],
                 hoverinfo="text",
-                marker={"size": 25 if role == "Primary employer" else 18, "color": color, "line": {"width": 2, "color": "#09131d"}},
+                marker={"size": 25 if role == "Primary employer" else 18, "color": color, "line": {"width": 2, "color": "#ffffff"}},
             )
         )
     figure.update_layout(
@@ -179,9 +567,10 @@ def network_chart(edges: pd.DataFrame, primary: str, names: dict[str, str]) -> g
         margin={"l": 10, "r": 10, "t": 20, "b": 10},
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
+        font={"color": "#243b53"},
         xaxis={"visible": False},
         yaxis={"visible": False, "scaleanchor": "x", "scaleratio": 1},
-        legend={"orientation": "h", "y": -0.03, "font": {"color": "#b9c8d6"}},
+        legend={"orientation": "h", "y": -0.03, "font": {"color": "#526d82"}},
     )
     return figure
 
@@ -201,8 +590,12 @@ if cases.empty:
     st.stop()
 
 with st.sidebar:
-    st.markdown('<div class="eyebrow">SHADOWTRACEAI</div>', unsafe_allow_html=True)
-    st.markdown("### Investigation workspace")
+    st.markdown(
+        '<div class="brand-mark">◇</div><div class="brand-title">ShadowTraceAI</div>'
+        '<div class="brand-copy">AML intelligence workspace<br>Snowflake-native investigation</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown("#### Case selection")
     labels = {
         row.case_id: f"{row.case_id} · {row.risk_band or 'UNSCORED'} · {row.display_name}"
         for row in cases.itertuples()
@@ -218,11 +611,12 @@ with st.sidebar:
 case_row = cases[cases["case_id"] == selected_case].iloc[0]
 account_id = case_row["account_id"]
 
-st.markdown('<div class="eyebrow">AML INTELLIGENCE COPILOT</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero">Connected evidence. Explainable decisions.</div>', unsafe_allow_html=True)
 st.markdown(
+    f'<div class="workspace-header"><div><div class="eyebrow">AML INTELLIGENCE COPILOT</div>'
+    f'<div class="hero">Connected evidence. Explainable decisions.</div>'
     f'<div class="subtle">{selected_case} · {case_row["display_name"]} · '
-    f'Status {case_row["alert_status"]}</div>',
+    f'Status {case_row["alert_status"]}</div></div>'
+    f'<div class="live-chip">● LIVE SNOWFLAKE DATA</div></div>',
     unsafe_allow_html=True,
 )
 
@@ -261,6 +655,29 @@ with tabs[0]:
     c1.metric("Alert type", alert["alert_type"].replace("_", " ").title())
     c2.metric("Owner", alert["assigned_to"])
     c3.metric("Opened", pd.to_datetime(alert["created_at"]).strftime("%d %b %Y"))
+    st.markdown("### New-transaction processing")
+    pipeline_events = query(
+        f"""
+        SELECT transaction_id, processed_at, processing_status, processor_name,
+               risk_score, risk_band, recommended_route, cortex_agent
+        FROM {DB}.vw_transaction_processing_status
+        WHERE case_id = ?
+        ORDER BY processed_at DESC
+        LIMIT 10
+        """,
+        [selected_case],
+    )
+    p1, p2, p3 = st.columns(3)
+    p1.metric("Ingestion pipeline", "STREAM + TASK")
+    p2.metric("Cortex Agent", "REGISTERED")
+    p3.metric("Processed transactions", len(pipeline_events))
+    st.caption(
+        "New transaction → TRANSACTIONS_CHANGE_STREAM → PROCESS_NEW_TRANSACTIONS_TASK → "
+        "SP_PROCESS_NEW_TRANSACTIONS → live risk views → SHADOWTRACE_AML_ORCHESTRATOR"
+    )
+    if not pipeline_events.empty:
+        with st.expander("Recent processing events"):
+            st.dataframe(pipeline_events, use_container_width=True, hide_index=True)
 
 with tabs[1]:
     signals = query(
@@ -444,3 +861,207 @@ with tabs[7]:
         mime="text/csv",
     )
 
+@st.dialog("Ask ShadowTrace", width="small")
+def show_copilot_popup():
+    st.caption("First-class Snowflake Cortex Agent + five governed specialist tools. Decisions remain human-controlled.")
+    st.caption(f"Active context: **{selected_case}** / {case_row['display_name']}")
+    with st.expander("Cortex Agent and tool team"):
+        st.markdown(
+            "- **SHADOWTRACE_AML_ORCHESTRATOR** - visible Cortex Agent object\n"
+            "- **typology_detection** - exploitation patterns\n"
+            "- **network_intelligence** - connected accounts and control\n"
+            "- **evidence_review** - documents and external intelligence\n"
+            "- **risk_explanation** - score, band and factors\n"
+            "- **case_brief** - hypothesis, narrative and action"
+        )
+    with st.expander("Investigator settings"):
+        copilot_actor = st.text_input(
+            "Investigator name",
+            value="AML Demo Reviewer",
+            key=f"copilot_actor_{selected_case}",
+        )
+    notice_key = f"copilot_notice_{selected_case}"
+    if notice_key in st.session_state:
+        notice_level, notice_text = st.session_state.pop(notice_key)
+        if notice_level == "success":
+            st.success(notice_text)
+        else:
+            st.warning(notice_text)
+
+    suggestions = [
+        "Give me a full review of risk, typologies, network, evidence, and recommended action.",
+        "Why is this case scored 92?",
+        "Summarise the wage-harvesting evidence.",
+        "Explain the connected account network.",
+        "What evidence is missing?",
+    ]
+    selected_prompt = None
+    with st.expander("Suggested questions"):
+        for suggestion in suggestions:
+            if st.button(
+                suggestion,
+                key=f"copilot_suggestion_{selected_case}_{suggestion}",
+                use_container_width=True,
+            ):
+                selected_prompt = suggestion
+
+    if "copilot_session_id" not in st.session_state:
+        st.session_state.copilot_session_id = str(uuid.uuid4())
+    history_key = f"copilot_history_{selected_case}"
+    if history_key not in st.session_state:
+        stored_messages = query(
+            f"""
+            SELECT message_role, actor_name, message_text, TO_JSON(source_objects) AS source_objects
+            FROM (
+              SELECT message_role, actor_name, message_text, source_objects, message_ts
+              FROM {DB}.case_copilot_messages
+              WHERE case_id = ?
+              ORDER BY message_ts DESC
+              LIMIT 20
+            )
+            ORDER BY message_ts
+            """,
+            [selected_case],
+        )
+        st.session_state[history_key] = [
+            {
+                "role": str(row.message_role).lower(),
+                "actor": row.actor_name,
+                "content": row.message_text,
+                "sources": parse_semistructured(row.source_objects) or [],
+            }
+            for row in stored_messages.itertuples()
+        ]
+
+    history = st.session_state[history_key]
+    conversation = st.container(height=230, border=False)
+    with conversation:
+        if not history:
+            st.caption("Ask a question or choose a suggestion to begin the case conversation.")
+        for message in history:
+            role = "assistant" if message["role"] == "assistant" else "user"
+            with st.chat_message(role):
+                st.markdown(message["content"])
+                if message.get("sources"):
+                    st.caption("Sources: " + " | ".join(f"`{source}`" for source in message["sources"]))
+
+    st.markdown("**Ask your own question**")
+    with st.form(f"copilot_question_form_{selected_case}", clear_on_submit=True):
+        question_column, send_column = st.columns([3.5, 1])
+        typed_prompt = question_column.text_input(
+            "Question",
+            placeholder="Ask about the score, evidence or network",
+            key=f"copilot_question_input_{selected_case}",
+            label_visibility="collapsed",
+        )
+        question_submitted = send_column.form_submit_button("Send", type="primary", use_container_width=True)
+
+    prompt = selected_prompt or (typed_prompt.strip() if question_submitted and typed_prompt.strip() else None)
+    if prompt:
+        clean_actor = copilot_actor.strip() or "Unnamed investigator"
+        persistence_errors = []
+        try:
+            record_copilot_message(
+                selected_case,
+                st.session_state.copilot_session_id,
+                "USER",
+                clean_actor,
+                prompt,
+                [],
+            )
+            user_recorded = True
+        except Exception as exc:
+            user_recorded = False
+            persistence_errors.append(f"Question audit failed: {exc}")
+
+        cortex_fallback_reason = None
+        try:
+            with st.spinner("Snowflake Cortex Agent is planning and invoking tools..."):
+                orchestration = run_cortex_agent(prompt, selected_case)
+        except Exception as exc:
+            cortex_fallback_reason = str(exc)
+            orchestration = orchestrate_case_question(
+                prompt,
+                selected_case,
+                str(case_row["display_name"]),
+                risk,
+                signals,
+                edges,
+                docs,
+                intel,
+                tx,
+                brief,
+            )
+            orchestration["backend"] = "GOVERNED_LOCAL_FALLBACK"
+        answer = orchestration["answer"]
+        sources = orchestration["sources"]
+        request_id = str(uuid.uuid4())
+        agent_runs_recorded = 0
+        for contribution in orchestration["contributions"]:
+            try:
+                record_agent_execution(
+                    request_id,
+                    selected_case,
+                    st.session_state.copilot_session_id,
+                    contribution["agent"],
+                    contribution["routing_reason"],
+                    contribution["response"],
+                    contribution["sources"],
+                )
+                agent_runs_recorded += 1
+            except Exception as exc:
+                persistence_errors.append(f"{contribution['agent']} execution audit failed: {exc}")
+        try:
+            record_agent_execution(
+                request_id,
+                selected_case,
+                st.session_state.copilot_session_id,
+                "Case Orchestrator Agent",
+                orchestration["routing_reason"],
+                answer,
+                sources,
+            )
+            agent_runs_recorded += 1
+        except Exception as exc:
+            persistence_errors.append(f"Case Orchestrator execution audit failed: {exc}")
+        try:
+            record_copilot_message(
+                selected_case,
+                st.session_state.copilot_session_id,
+                "ASSISTANT",
+                "ShadowTraceAI Investigation Copilot",
+                answer,
+                sources,
+            )
+            assistant_recorded = True
+        except Exception as exc:
+            assistant_recorded = False
+            persistence_errors.append(f"Response audit failed: {exc}")
+
+        history.extend(
+            [
+                {"role": "user", "actor": clean_actor, "content": prompt, "sources": []},
+                {"role": "assistant", "actor": "ShadowTraceAI Investigation Copilot", "content": answer, "sources": sources},
+            ]
+        )
+        expected_agent_runs = len(orchestration["contributions"]) + 1
+        if user_recorded and assistant_recorded and agent_runs_recorded == expected_agent_runs:
+            if cortex_fallback_reason:
+                st.session_state[notice_key] = (
+                    "warning",
+                    "The first-class Cortex Agent was unavailable for this turn, so the governed local "
+                    f"orchestrator completed it instead. Detail: {cortex_fallback_reason}",
+                )
+            else:
+                st.session_state[notice_key] = (
+                    "success",
+                    f"Snowflake Cortex Agent and {len(orchestration['contributions'])} selected tool(s) "
+                    "completed. Executions and messages were recorded in Snowflake.",
+                )
+        else:
+            st.session_state[notice_key] = ("warning", " ".join(persistence_errors))
+        st.rerun(scope="fragment")
+
+
+if st.button("Ask ShadowTrace", key="chat_launcher"):
+    show_copilot_popup()

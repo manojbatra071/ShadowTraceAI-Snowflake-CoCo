@@ -26,10 +26,11 @@ Local repo + natural-language prompt
 1. Start from the repository root with
    `cortex -c <connection> -w . --plan`.
 2. Ask CoCo to inspect the live schema before allowing writes.
-3. Execute `sql/01_schema.sql` through `sql/06_decisions_audit.sql` in order.
+3. Execute the ordered build scripts through `sql/11_transaction_pipeline.sql`.
 4. Ask CoCo to reconcile `CASE-C003` against the CSV evidence and every
    component in `score_breakdown`.
-5. Execute `tests/test_risk_logic.sql`; retain the result table and query IDs.
+5. Execute the risk, copilot, multi-agent, Cortex Agent, and transaction-pipeline
+   tests; retain result tables, tool traces, and query IDs.
 6. Deploy with `sql/07_deploy_streamlit.sql` after setting the warehouse.
 7. In the app, record the demo reviewer decision and have CoCo query the linked
    decision/audit rows.
@@ -55,7 +56,9 @@ Local repo + natural-language prompt
 - [ ] `92 / CRITICAL / STRONG` risk result and score breakdown
 - [ ] Six passing SQL tests
 - [ ] Streamlit deployment URL
+- [ ] `SHADOWTRACE_AML_ORCHESTRATOR` visible under AI & ML → Agents
+- [ ] Cortex Agent tool-use trace for `CASE-C003`
+- [ ] New-transaction stream/task processing evidence
 - [ ] Decision row linked to its audit event
 - [ ] CoCo evidence summary with supporting Snowflake query IDs
 - [ ] Screenshots added to `docs/screenshots/`
-

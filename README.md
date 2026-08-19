@@ -169,6 +169,20 @@ Configure a Snowflake CLI connection, then verify it:
 snow connection test -c <connection>
 ```
 
+On Windows, after creating a password-free connection named `shadowtrace`, the
+repository also provides a secure interactive setup helper:
+
+```powershell
+.\scripts\setup-snowflake.ps1
+```
+
+The helper prompts for the password without echoing it, tests the connection,
+and stores a Windows DPAPI-encrypted credential under the ignored
+`.snowflake/` directory after successful authentication. It asks for
+confirmation before creating objects, runs the build and acceptance tests,
+deploys Streamlit, and clears the temporary password environment variable when
+finished. Use `-AppOnly` to publish interface changes without rebuilding data.
+
 ### 2. Create, load, and build
 
 Run from the repository root so the `PUT file://data/seed/...` paths resolve:
@@ -180,6 +194,10 @@ snow sql -c <connection> -f sql/03_typology_views.sql
 snow sql -c <connection> -f sql/04_risk_scoring.sql
 snow sql -c <connection> -f sql/05_case_brief.sql
 snow sql -c <connection> -f sql/06_decisions_audit.sql
+snow sql -c <connection> -f sql/08_investigation_copilot.sql
+snow sql -c <connection> -f sql/09_multi_agent_orchestration.sql
+snow sql -c <connection> -f sql/10_cortex_agent.sql
+snow sql -c <connection> -f sql/11_transaction_pipeline.sql
 ```
 
 Optional Cortex view:
@@ -192,10 +210,17 @@ snow sql -c <connection> -f sql/05b_cortex_brief_optional.sql
 
 ```powershell
 snow sql -c <connection> -f tests/test_risk_logic.sql
+snow sql -c <connection> -f tests/test_copilot.sql
+snow sql -c <connection> -f tests/test_multi_agent.sql
+snow sql -c <connection> -f tests/test_cortex_agent.sql
+snow sql -c <connection> -f tests/test_new_transaction_pipeline.sql
 ```
 
-The script emits six `PASS` rows and raises a Snowflake exception if any
-expectation fails.
+The risk script emits six `PASS` rows. The copilot smoke test validates two
+messages, two linked audit events, and source-object persistence. The
+multi-agent test verifies the orchestrator plus all five specialists, including
+six execution records and six linked audit events. Each smoke test removes its
+records and raises a Snowflake exception if an expectation fails.
 
 ### 4. Deploy Streamlit
 
@@ -231,6 +256,32 @@ The app contains:
 6. **Case Intelligence Brief** — executive summary through recommended action.
 7. **Reviewer Decision** — named, acknowledged human decision form.
 8. **Audit Trail** — chronological events and downloadable CSV.
+Across all eight tabs, a floating **Ask ShadowTrace** launcher opens a compact
+bottom-right chat window with case-aware questions, grounded answers, source
+citations, suggested prompts, conversation persistence, and audit logging. The
+popup overlays the page instead of reducing the investigation workspace width.
+
+The visible copilot is a **Case Orchestrator Agent** backed by five bounded
+specialists: Typology Detection, Network Intelligence, Evidence Review, Risk
+Explanation, and Case Brief. The orchestrator routes each question to one or
+more specialists and identifies contributors in the answer. Governed response
+logic over curated Snowflake objects keeps the demo reliable when Cortex access
+is unavailable. `sql/08_investigation_copilot.sql` records both conversation
+sides; `sql/09_multi_agent_orchestration.sql` records every orchestrator and
+specialist execution in `case_agent_executions` with linked `audit_events`.
+The agent team is read-only and cannot record a decision or file a SAR.
+
+`sql/10_cortex_agent.sql` also creates the first-class Snowflake Cortex Agent
+`SHADOWTRACE_AML_ORCHESTRATOR`. It is visible under **AI & ML → Agents** and
+has five governed custom tools backed by SQL UDFs. The Streamlit popup invokes
+this object through `SNOWFLAKE.CORTEX.DATA_AGENT_RUN`; the local router is only
+a resilience fallback.
+
+New transactions are processed independently of Streamlit. The
+`TRANSACTIONS_CHANGE_STREAM` captures inserts, the triggered
+`PROCESS_NEW_TRANSACTIONS_TASK` invokes `SP_PROCESS_NEW_TRANSACTIONS`, and the
+procedure links the transaction to a case, writes processing/audit records, and
+exposes updated evidence to the live risk views and Cortex Agent tools.
 
 ## Reviewer decision flow
 
@@ -333,8 +384,8 @@ mockups. The required capture names and reset SQL are in
 │   ├── architecture.md
 │   ├── demo-script.md
 │   └── screenshots/README.md
-├── sql/01_schema.sql ... 07_deploy_streamlit.sql
-├── tests/test_risk_logic.sql
+├── sql/01_schema.sql ... 11_transaction_pipeline.sql
+├── tests/test_risk_logic.sql and test_copilot.sql
 ├── environment.yml
 └── requirements.txt
 ```

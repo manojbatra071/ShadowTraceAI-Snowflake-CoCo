@@ -77,7 +77,28 @@ Evidence to retain: CoCo's evidence-grounded answer and the underlying query IDs
 
 Evidence to retain: the stored procedure result and linked audit rows.
 
+## 8. Create and inspect the first-class Cortex Agent
+
+> Review `sql/10_cortex_agent.sql`. Create
+> `SHADOWTRACE_AML_ORCHESTRATOR` as a Snowflake Cortex Agent object with five
+> governed custom tools. Run `SHOW AGENTS`, `DESCRIBE AGENT`, and
+> `tests/test_cortex_agent.sql`. Confirm the response trace contains a real
+> `risk_explanation` generic tool invocation for `CASE-C003`.
+
+Evidence to retain: the Agent Admin page, agent specification, tool-use trace,
+and completed response.
+
+## 9. Prove new-transaction processing
+
+> Review `sql/11_transaction_pipeline.sql`. Insert the synthetic smoke-test
+> transaction, prove that `TRANSACTIONS_CHANGE_STREAM` captures it, run or
+> observe `PROCESS_NEW_TRANSACTIONS_TASK`, and verify the resulting row in
+> `VW_TRANSACTION_PROCESSING_STATUS` and linked audit event. Demonstrate that
+> Streamlit is a presentation layer rather than the transaction processor.
+
+Evidence to retain: stream/task status, processing event, audit record, and
+clean test-data removal.
+
 > Submission note: terminal screenshots/query IDs should be captured from the
 > connected Snowflake account after these prompts are executed. This repository
 > intentionally contains no fabricated command output.
-
