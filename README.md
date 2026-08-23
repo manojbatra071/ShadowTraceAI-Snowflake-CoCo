@@ -213,13 +213,17 @@ snow sql -c <connection> -f tests/test_risk_logic.sql
 snow sql -c <connection> -f tests/test_copilot.sql
 snow sql -c <connection> -f tests/test_multi_agent.sql
 snow sql -c <connection> -f tests/test_cortex_agent.sql
+snow sql -c <connection> -f tests/test_chatbot_end_to_end.sql
 snow sql -c <connection> -f tests/test_new_transaction_pipeline.sql
+snow sql -c <connection> -f tests/test_human_in_the_loop.sql
 ```
 
 The risk script emits six `PASS` rows. The copilot smoke test validates two
 messages, two linked audit events, and source-object persistence. The
 multi-agent test verifies the orchestrator plus all five specialists, including
-six execution records and six linked audit events. Each smoke test removes its
+six execution records and six linked audit events. The human-in-the-loop test
+exercises all four reviewer outcomes, HUMAN audit linkage, case routing, and
+rejection of an autonomous SAR-filing action. Each smoke test removes its
 records and raises a Snowflake exception if an expectation fails.
 
 ### 4. Deploy Streamlit
@@ -391,6 +395,10 @@ mockups. The required capture names and reset SQL are in
 ```
 
 ## Responsible-use note
+
+See [Multi-Agent Orchestration and Chatbot Guide](docs/multi-agent-chatbot-guide.md)
+for the deployed Cortex Agent, governed specialist tools, chatbot lifecycle,
+audit records, and demonstration sequence.
 
 ShadowTraceAI identifies indicators for investigation; it does not determine
 that exploitation occurred, replace safeguarding protocols, or make autonomous

@@ -126,8 +126,12 @@ try {
     Invoke-SnowCommand -Arguments @("sql", "-c", "shadowtrace", "-f", "tests/test_multi_agent.sql")
     Write-Host "Running first-class Cortex Agent test ..."
     Invoke-SnowCommand -Arguments @("sql", "-c", "shadowtrace", "-f", "tests/test_cortex_agent.sql")
+    Write-Host "Running live chatbot orchestration test ..."
+    Invoke-SnowCommand -Arguments @("sql", "-c", "shadowtrace", "-f", "tests/test_chatbot_end_to_end.sql")
     Write-Host "Running new-transaction pipeline test ..."
     Invoke-SnowCommand -Arguments @("sql", "-c", "shadowtrace", "-f", "tests/test_new_transaction_pipeline.sql")
+    Write-Host "Running human-in-the-loop decision test ..."
+    Invoke-SnowCommand -Arguments @("sql", "-c", "shadowtrace", "-f", "tests/test_human_in_the_loop.sql")
 
     if (-not $SkipStreamlitDeployment) {
         Write-Host "Deploying the Snowflake-native Streamlit app ..."

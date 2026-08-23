@@ -62,40 +62,53 @@ RETURNS VARCHAR
 LANGUAGE SQL
 AS
 $$
+  WITH case_context AS (
+    SELECT case_id, account_id
+    FROM case_alerts
+    WHERE case_id = p_case_id
+  ),
+  document_summary AS (
+    SELECT
+      case_id,
+      ARRAY_AGG(OBJECT_CONSTRUCT_KEEP_NULL(
+        'document_type', document_type,
+        'file_name', file_name,
+        'extraction_confidence', extraction_confidence,
+        'risk_indicators', risk_indicators,
+        'evidence_summary', evidence_summary,
+        'review_status', review_status
+      )) AS documents
+    FROM document_evidence
+    WHERE case_id = p_case_id
+    GROUP BY case_id
+  ),
+  relevant_accounts AS (
+    SELECT account_id FROM case_context
+    UNION
+    SELECT source_account_id FROM vw_case_network WHERE case_id = p_case_id
+    UNION
+    SELECT target_account_id FROM vw_case_network WHERE case_id = p_case_id
+  ),
+  intelligence_summary AS (
+    SELECT ARRAY_AGG(OBJECT_CONSTRUCT_KEEP_NULL(
+      'source_type', w.source_type,
+      'entity_name', w.entity_name,
+      'risk_level', w.risk_level,
+      'match_strength', w.match_strength,
+      'summary', w.summary
+    )) AS external_intelligence
+    FROM external_watchlist w
+    JOIN relevant_accounts r ON r.account_id = w.matched_account_id
+  )
   SELECT TO_JSON(OBJECT_CONSTRUCT_KEEP_NULL(
     'case_id', c.case_id,
     'account_id', c.account_id,
-    'documents', (
-      SELECT ARRAY_AGG(OBJECT_CONSTRUCT_KEEP_NULL(
-        'document_type', d.document_type,
-        'file_name', d.file_name,
-        'extraction_confidence', d.extraction_confidence,
-        'risk_indicators', d.risk_indicators,
-        'evidence_summary', d.evidence_summary,
-        'review_status', d.review_status
-      ))
-      FROM document_evidence d
-      WHERE d.case_id = c.case_id
-    ),
-    'external_intelligence', (
-      SELECT ARRAY_AGG(OBJECT_CONSTRUCT_KEEP_NULL(
-        'source_type', w.source_type,
-        'entity_name', w.entity_name,
-        'risk_level', w.risk_level,
-        'match_strength', w.match_strength,
-        'summary', w.summary
-      ))
-      FROM external_watchlist w
-      WHERE w.matched_account_id = c.account_id
-         OR w.matched_account_id IN (
-           SELECT source_account_id FROM vw_case_network WHERE case_id = c.case_id
-           UNION
-           SELECT target_account_id FROM vw_case_network WHERE case_id = c.case_id
-         )
-    )
+    'documents', COALESCE(d.documents, ARRAY_CONSTRUCT()),
+    'external_intelligence', COALESCE(i.external_intelligence, ARRAY_CONSTRUCT())
   ))
-  FROM case_alerts c
-  WHERE c.case_id = p_case_id
+  FROM case_context c
+  LEFT JOIN document_summary d ON d.case_id = c.case_id
+  CROSS JOIN intelligence_summary i
 $$;
 
 CREATE OR REPLACE FUNCTION fn_agent_case_brief(p_case_id VARCHAR)
@@ -123,7 +136,7 @@ CREATE OR REPLACE AGENT shadowtrace_aml_orchestrator
   $$
   orchestration:
     budget:
-      seconds: 45
+      seconds: 90
       tokens: 12000
 
   instructions:
@@ -152,11 +165,11 @@ CREATE OR REPLACE AGENT shadowtrace_aml_orchestrator
         input_schema:
           type: "object"
           properties:
-            case_id:
+            p_case_id:
               type: "string"
               description: "AML case identifier, for example CASE-C003."
           required:
-            - "case_id"
+            - "p_case_id"
     - tool_spec:
         type: "generic"
         name: "typology_detection"
@@ -164,11 +177,11 @@ CREATE OR REPLACE AGENT shadowtrace_aml_orchestrator
         input_schema:
           type: "object"
           properties:
-            case_id:
+            p_case_id:
               type: "string"
               description: "AML case identifier, for example CASE-C003."
           required:
-            - "case_id"
+            - "p_case_id"
     - tool_spec:
         type: "generic"
         name: "network_intelligence"
@@ -176,11 +189,11 @@ CREATE OR REPLACE AGENT shadowtrace_aml_orchestrator
         input_schema:
           type: "object"
           properties:
-            case_id:
+            p_case_id:
               type: "string"
               description: "AML case identifier, for example CASE-C003."
           required:
-            - "case_id"
+            - "p_case_id"
     - tool_spec:
         type: "generic"
         name: "evidence_review"
@@ -188,11 +201,11 @@ CREATE OR REPLACE AGENT shadowtrace_aml_orchestrator
         input_schema:
           type: "object"
           properties:
-            case_id:
+            p_case_id:
               type: "string"
               description: "AML case identifier, for example CASE-C003."
           required:
-            - "case_id"
+            - "p_case_id"
     - tool_spec:
         type: "generic"
         name: "case_brief"
@@ -200,11 +213,11 @@ CREATE OR REPLACE AGENT shadowtrace_aml_orchestrator
         input_schema:
           type: "object"
           properties:
-            case_id:
+            p_case_id:
               type: "string"
               description: "AML case identifier, for example CASE-C003."
           required:
-            - "case_id"
+            - "p_case_id"
 
   tool_resources:
     risk_explanation:

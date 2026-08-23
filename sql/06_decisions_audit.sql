@@ -37,11 +37,11 @@ BEGIN
   INSERT INTO audit_events (
     audit_event_id, case_id, event_ts, actor_type, actor_name, event_type,
     event_detail, object_type, object_id, event_metadata
-  ) VALUES (
+  )
+  SELECT
     :v_audit_id, :p_case_id, CURRENT_TIMESTAMP(), 'HUMAN', :p_reviewer_name,
     'REVIEWER_DECISION', 'Reviewer selected ' || :p_decision || '. Rationale: ' || :p_rationale,
-    'DECISION', :v_decision_id, OBJECT_CONSTRUCT('decision', :p_decision)
-  );
+    'DECISION', :v_decision_id, OBJECT_CONSTRUCT('decision', :p_decision);
 
   UPDATE case_alerts
   SET
@@ -57,4 +57,3 @@ EXCEPTION
     RAISE;
 END;
 $$;
-
